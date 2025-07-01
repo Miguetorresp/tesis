@@ -1,0 +1,17 @@
+# Entornos virtuales
+venv/
+.env
+
+# Archivos de Django
+*.pyc
+__pycache__/
+db.sqlite3
+
+# Archivos del editor
+*.swp
+.vscode/
+.idea/
+
+# Archivos de migraciones (opcional)
+**/migrations/*.pyc
+**/migrations/__pycache__/
