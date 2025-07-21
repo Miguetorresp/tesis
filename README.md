@@ -38,6 +38,13 @@ Con ello, esta plataforma busca no solo dar respuesta a una necesidad técnica, 
 - Git
 - pip y virtualenv
 
+---
+
+## Arquitectura
+
+<img width="1208" height="643" alt="Arquitectura" src="https://github.com/user-attachments/assets/0ad62525-5482-4022-95d6-aa41b1fe44d2" />
+
+
 ## Instalación del entorno de desarrollo
 
 1. **Clona el repositorio**
