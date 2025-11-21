@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    {% load static %}
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <title>Login</title>
+<style>
+         body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(30, 58, 138, 0.12);
+            overflow: hidden;
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .login-image {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(37, 99, 235, 0.8)), 
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><rect fill="%2310B981" width="400" height="400"/><circle cx="100" cy="100" r="80" fill="%231E3A8A" opacity="0.3"/><circle cx="300" cy="300" r="100" fill="%232563EB" opacity="0.3"/></svg>');
+            background-size: cover;
+            background-position: center;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            position: relative;
+        }
+        
+        .login-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="25" cy="25" r="2" fill="white" opacity="0.3"/><circle cx="75" cy="75" r="2" fill="white" opacity="0.3"/><circle cx="50" cy="50" r="1.5" fill="white" opacity="0.4"/></svg>');
+            background-size: 50px 50px;
+            opacity: 0.5;
+        }
+        
+        .login-image-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        
+        .pet-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .login-form-container {
+            flex: 1;
+            padding: 30px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .brand-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--bs-body-color);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--bs-secondary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        {% comment %} .btn {
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-outline-secondary {
+            border: 2px solid #e5e7eb;
+            background: white;
+            color: var(--bs-body-color);
+        }
+        
+        .btn-outline-secondary:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            color: var(--bs-body-color);
+        }
+         {% endcomment %}
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #9ca3af;
+            margin: 24px 0;
+            font-size: 14px;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .divider span {
+            padding: 0 16px;
+        }
+        
+        .link-primary {
+            color: var(--bs-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .link-primary:hover {
+            color: var(--bs-primary);
+            text-decoration: underline;
+        }
+        
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #f0f9ff;
+            border-radius: 12px;
+            margin-top: 24px;
+            border-left: 4px solid var(--bs-success);
+        }
+        
+        .trust-badge i {
+            color: var(--bs-success);
+            font-size: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .login-image {
+                display: none;
+            }
+            .login-form-container {
+                padding: 40px 30px;
+            }
+        }
+    </style>
+  </head>
+  <body>
+<div class="login-container">
+        <div class="login-card">
+            <!-- Sección Izquierda - Imagen -->
+            <div class="login-image">
+                <div class="login-image-content">
+                    <div class="pet-icon">🐾</div>
+                    <h2 class="mb-3 fw-bold">Tu mejor amigo te espera</h2>
+                    <p class="mb-4 opacity-90">Conecta, cuida y comparte momentos increíbles con tu mascota</p>
+                    <div class="d-flex gap-3 justify-content-center mt-4">
+                        <div class="text-center">
+                            <div class="fs-3 fw-bold">50K+</div>
+                            <small class="opacity-75">Usuarios</small>
+                        </div>
+                        <div class="text-center">
+                            <div class="fs-3 fw-bold">100K+</div>
+                            <small class="opacity-75">Mascotas</small>
+                        </div>
+                        <div class="text-center">
+                            <div class="fs-3 fw-bold">4.8★</div>
+                            <small class="opacity-75">Rating</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección Derecha - Formulario -->
+            <div class="login-form-container">
+                <div class="brand-icon">
+                    <i class="bi bi-heart-fill"></i>
+                </div>
+                
+                <h1 class="h2 fw-bold mb-2">Bienvenido de nuevo</h1>
+                <p class="text-muted mb-4">Ingresa tus credenciales para continuar</p>
+                
+                <form>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="email" placeholder="tu@email.com" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" placeholder="••••••••" required>
+                            <span class="input-icon" onclick="togglePassword()">
+                                <i class="bi bi-eye" id="toggleIcon"></i>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="remember">
+                            <label class="form-check-label" for="remember">
+                                Recordarme
+                            </label>
+                        </div>
+                        <a href="#" class="link-primary">¿Olvidaste tu contraseña?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                        <span class="position-relative">Iniciar Sesión</span>
+                    </button>
+                    
+                    {% comment %} <div class="divider">
+                        <span>O continúa con</span>
+                    </div>
+                    
+                    <button type="button" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-google me-2"></i>
+                        Continuar con Google
+                    </button> {% endcomment %}
+                    <p class="text-center mt-2 mb-0">
+                        ¿No tienes cuenta? <a href="#" class="link-primary">Regístrate gratis</a>
+                    </p>
+                    <div class="trust-badge">
+                        <i class="bi bi-shield-check"></i>
+                        <div>
+                            <div class="fw-semibold" style="font-size: 14px;">Conexión 100% Segura</div>
+                            <small class="text-muted">Tus datos están protegidos con encriptación SSL</small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        }
+    </script>
+</html>
