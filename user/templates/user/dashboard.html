@@ -1,0 +1,16 @@
+{% extends 'base/base.html' %}
+
+{% block title %} Dashboard {% endblock %}
+
+{% block content %}
+<h1>Panel General</h1>
+
+<p>ID usuario: {{ user.user_id }}</p>
+<p>Nombre: {{ user.first_name }}</p>
+<p>Rol: {{ user.role }}</p>
+
+<pre>
+{{ user | pprint }}
+</pre>
+
+{% endblock %}

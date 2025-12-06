@@ -1,0 +1,151 @@
+{% comment %} <div class="sidebar">
+    <h2 class="logo">MiSistema</h2>
+
+    <ul class="menu">
+        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+
+        {% if user.role_id == 1 %}
+        <li><a href="/admin/users/">Gestión Usuarios</a></li>
+        <li><a href="/admin/roles/">Roles</a></li>
+        {% endif %}
+
+        <li><a href="/profile/">Perfil</a></li>
+        <li><a href="/settings/">Configuración</a></li>
+
+        <li><a href="/logout/">Salir</a></li>
+    </ul>
+</div> {% endcomment %}
+{% load static %}
+<aside class="sidebar" id="sidebar">
+    <!-- Logo y Toggle -->
+    <div class="sidebar-header">
+        <div class="logo-container">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo-img">
+            <span class="logo-text">MiSistema</span>
+        </div>
+    </div>
+
+    <!-- Navegación -->
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <p class="nav-section-title">DASHBOARDS</p>
+            
+            <a href="{% url 'dashboard' %}" class="nav-link active">
+                <i class="bi bi-house-door"></i>
+                <span class="nav-text">Dashboards</span>
+            </a>
+            
+            <a href="#salesSubmenu" class="nav-link" data-bs-toggle="collapse">
+                <i class="bi bi-graph-up"></i>
+                <span class="nav-text">Sales</span>
+                <i class="bi bi-chevron-down ms-auto toggle-icon"></i>
+            </a>
+            <div class="collapse submenu" id="salesSubmenu">
+                <a href="#" class="nav-link submenu-link">
+                    <span class="nav-text">Overview</span>
+                </a>
+                <a href="#" class="nav-link submenu-link">
+                    <span class="nav-text">Reports</span>
+                </a>
+            </div>
+
+            <a href="#" class="nav-link">
+                <i class="bi bi-bar-chart"></i>
+                <span class="nav-text">Analytics</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="bi bi-cart"></i>
+                <span class="nav-text">Ecommerce</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="bi bi-people"></i>
+                <span class="nav-text">CRM</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="bi bi-currency-bitcoin"></i>
+                <span class="nav-text">Crypto</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="bi bi-diamond"></i>
+                <span class="nav-text">NFT</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="bi bi-folder"></i>
+                <span class="nav-text">Projects</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="bi bi-briefcase"></i>
+                <span class="nav-text">Jobs</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="bi bi-person-badge"></i>
+                <span class="nav-text">HRM</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="bi bi-book"></i>
+                <span class="nav-text">Courses</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span class="nav-text">Stocks</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="bi bi-heart-pulse"></i>
+                <span class="nav-text">Medical</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="bi bi-shop"></i>
+                <span class="nav-text">POS System</span>
+            </a>
+        </div>
+
+        {% if user.role_id == 1 %}
+        <div class="nav-section mt-4">
+            <p class="nav-section-title">ADMINISTRACIÓN</p>
+            
+            <a href="/admin/users/" class="nav-link">
+                <i class="bi bi-person-gear"></i>
+                <span class="nav-text">Gestión Usuarios</span>
+            </a>
+            
+            <a href="/admin/roles/" class="nav-link">
+                <i class="bi bi-shield-check"></i>
+                <span class="nav-text">Roles</span>
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="nav-section mt-4">
+            <p class="nav-section-title">CONFIGURACIÓN</p>
+            
+            <a href="/profile/" class="nav-link">
+                <i class="bi bi-person-circle"></i>
+                <span class="nav-text">Perfil</span>
+            </a>
+            
+            <a href="/settings/" class="nav-link">
+                <i class="bi bi-gear"></i>
+                <span class="nav-text">Configuración</span>
+            </a>
+            
+            <a href="/logout/" class="nav-link text-danger">
+                <i class="bi bi-box-arrow-right"></i>
+                <span class="nav-text">Salir</span>
+            </a>
+        </div>
+    </nav>
+</aside>
+
+<!-- Overlay para mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>

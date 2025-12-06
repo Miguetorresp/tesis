@@ -136,7 +136,7 @@
         
         .input-icon {
             position: absolute;
-            right: 16px;
+            right: 30px;
             top: 50%;
             transform: translateY(-50%);
             color: #9ca3af;
@@ -144,49 +144,6 @@
             z-index: 10;
         }
         
-        {% comment %} .btn {
-            border-radius: 12px;
-            padding: 12px 24px;
-            font-weight: 600;
-            font-size: 15px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        
-        .btn-primary:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        .btn-outline-secondary {
-            border: 2px solid #e5e7eb;
-            background: white;
-            color: var(--bs-body-color);
-        }
-        
-        .btn-outline-secondary:hover {
-            background: #f9fafb;
-            border-color: #d1d5db;
-            color: var(--bs-body-color);
-        }
-         {% endcomment %}
         .divider {
             display: flex;
             align-items: center;
@@ -273,79 +230,264 @@
             
             <!-- Sección Derecha - Formulario -->
             <div class="login-form-container">
-                <div class="brand-icon">
-                    <i class="bi bi-heart-fill"></i>
+                <div id="divLoginForm">
+                    <div class="brand-icon">
+                        <i class="bi bi-heart-fill"></i>
+                    </div>
+                    
+                    <h1 class="h2 fw-bold mb-2">Bienvenido de nuevo</h1>
+                    <p class="text-muted mb-4">Ingresa tus credenciales para continuar</p>
+                    
+                    <form id="loginForm" class="needs-validation" novalidate>
+                        {% comment %} {% csrf_token %} {% endcomment %}
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo Electrónico <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="tu@email.com" required>
+                            <div class="invalid-feedback">
+                                Por favor, ingresa un correo electrónico válido.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                                <span class="input-icon" onclick="togglePassword()">
+                                    <i class="bi bi-eye" id="toggleIcon"></i>
+                                </span>
+                                <div class="invalid-feedback">
+                                Por favor, ingresa una contraseña válida.
+                            </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember">
+                                <label class="form-check-label" for="remember">
+                                    Recordarme
+                                </label>
+                            </div>
+                            <a href="#" class="link-primary">¿Olvidaste tu contraseña?</a>
+                        </div>
+                        
+                        <button type="submit" id="loginButton" class="btn btn-primary btn-lg w-100 mb-3" onclick="this.classList.add('clicked')">
+                            <span class="position-relative">Iniciar Sesión</span>
+                        </button>
+                        <p class="text-center mt-2 mb-0">
+                            ¿No tienes cuenta? <a href="javascript:showForm('register');" class="link-primary">Regístrate gratis</a>
+                        </p>
+                        <div class="trust-badge">
+                            <i class="bi bi-shield-check"></i>
+                            <div>
+                                <div class="fw-semibold" style="font-size: 14px;">Conexión 100% Segura</div>
+                                <small class="text-muted">Tus datos están protegidos con encriptación SSL</small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="divRegisterForm" style="display: none;">
+                    <!-- Formulario de registro puede ir aquí -->
+                     <div class="brand-icon">
+                        <i class="bi bi-heart-fill"></i>
+                    </div>
+                    
+                    <h1 class="h2 fw-bold mb-2">Regístrate</h1>
+                    <p class="text-muted mb-4">Ingresa tus datos para continuar</p>
+
+                    <form id="registerForm" class="needs-validation" novalidate>
+                        {% comment %} {% csrf_token %} {% endcomment %}
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12 ">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Nombre <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="register_name" name="first_name" placeholder="Juan" required>
+                                    <div class="invalid-feedback">
+                                        Por favor, ingresa tu nombre.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-12 ">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Segundo Nombre</label>
+                                    <input type="text" class="form-control" id="register_second_name" name="second_name" placeholder="Miguel">
+                                    <div class="invalid-feedback">
+                                        Por favor, ingresa tu segundo nombre.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12 ">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Apellido <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="register_last_name" name="last_name" placeholder="Pérez" required>
+                                    <div class="invalid-feedback">
+                                        Por favor, ingresa tu apellido.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-12 ">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Segundo Apellido</label>
+                                    <input type="text" class="form-control" id="register_second_last_name" name="second_last_name" placeholder="Torres">
+                                    <div class="invalid-feedback">
+                                        Por favor, ingresa tu segundo apellido.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo Electrónico <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="register_email" name="register_email" placeholder="correo@ejemplo.com" required>
+                            <div class="invalid-feedback">
+                                Por favor, ingresa un correo electrónico válido.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="register_password" name="register_password" placeholder="••••••••" required>
+                            <div class="invalid-feedback">
+                                Por favor, ingresa una contraseña.
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirmar Contraseña <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="register_confirmPassword" name="register_confirmPassword" placeholder="••••••••" required>
+                            <div class="invalid-feedback">
+                                Por favor, confirma tu contraseña.
+                            </div>
+                        </div>
+                        
+                        <button type="submit" id="registerButton" class="btn btn-primary btn-lg w-100 mb-3" onclick="this.classList.add('clicked')">
+                            <span class="position-relative">Registrarse</span>
+                        </button>
+                        <p class="text-center mt-2 mb-0">
+                            ¿Ya tienes cuenta? <a href="javascript:showForm('login');" class="link-primary">Inicia Sesión</a>
+                        </p>
+                    </form>
                 </div>
                 
-                <h1 class="h2 fw-bold mb-2">Bienvenido de nuevo</h1>
-                <p class="text-muted mb-4">Ingresa tus credenciales para continuar</p>
-                
-                <form>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Correo Electrónico</label>
-                        <input type="email" class="form-control" id="email" placeholder="tu@email.com" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Contraseña</label>
-                        <div class="input-group">
-                            <input type="password" class="form-control" id="password" placeholder="••••••••" required>
-                            <span class="input-icon" onclick="togglePassword()">
-                                <i class="bi bi-eye" id="toggleIcon"></i>
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="remember">
-                            <label class="form-check-label" for="remember">
-                                Recordarme
-                            </label>
-                        </div>
-                        <a href="#" class="link-primary">¿Olvidaste tu contraseña?</a>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
-                        <span class="position-relative">Iniciar Sesión</span>
-                    </button>
-                    
-                    {% comment %} <div class="divider">
-                        <span>O continúa con</span>
-                    </div>
-                    
-                    <button type="button" class="btn btn-outline-secondary w-100">
-                        <i class="bi bi-google me-2"></i>
-                        Continuar con Google
-                    </button> {% endcomment %}
-                    <p class="text-center mt-2 mb-0">
-                        ¿No tienes cuenta? <a href="#" class="link-primary">Regístrate gratis</a>
-                    </p>
-                    <div class="trust-badge">
-                        <i class="bi bi-shield-check"></i>
-                        <div>
-                            <div class="fw-semibold" style="font-size: 14px;">Conexión 100% Segura</div>
-                            <small class="text-muted">Tus datos están protegidos con encriptación SSL</small>
-                        </div>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/base.js' %}"></script>
 <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleIcon = document.getElementById('toggleIcon');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleIcon.classList.remove('bi-eye');
-                toggleIcon.classList.add('bi-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                toggleIcon.classList.remove('bi-eye-slash');
-                toggleIcon.classList.add('bi-eye');
-            }
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
         }
-    </script>
+    }
+
+    document.getElementById("loginForm").addEventListener("submit", async e => {
+        const form = document.getElementById("loginForm");
+
+    // 💡 Validación nativa + Bootstrap
+    if (!form.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+        form.classList.add("was-validated");
+        return;
+    }
+        e.preventDefault();
+        const loginButton = document.getElementById("loginButton");
+        loginButton.disabled = true;
+        loginButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2 text-light" role="status" aria-hidden="true"></span> Iniciando...';
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        const response = await fetch("/user/auth/login/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+            credentials: "include"  // NECESARIO para cookies
+        });
+
+        if (response.ok) {
+            window.location.href = "/user/dashboard/";
+        } else {
+            loginButton.innerHTML = '<span class="position-relative">Iniciar Sesión</span>';
+            loginButton.disabled = false;
+            showToast("Credenciales inválidas", "error");
+        }
+    });
+
+    function showForm(formType) {
+        document.getElementById("divLoginForm").style.display = formType === "login" ? "block" : "none";
+        document.getElementById("divRegisterForm").style.display = formType === "register" ? "block" : "none";
+    }
+
+document.getElementById("registerForm").addEventListener("submit", async e => {
+    const form = document.getElementById("registerForm");
+
+    // 💡 Validación nativa + Bootstrap
+    if (!form.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+        form.classList.add("was-validated");
+        return; // No seguir si no es válido
+        console.log("Formulario inválido");
+    }
+
+    // Evitar envío normal
+    e.preventDefault();
+
+    // Spinner en el botón
+    const registerButton = document.getElementById("registerButton");
+    registerButton.disabled = true;
+    registerButton.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-2 text-light" role="status"></span> Registrando...';
+
+    const email = document.getElementById("register_email").value;
+    const password = document.getElementById("register_password").value;
+    const confirmPassword = document.getElementById("register_confirmPassword").value;
+    const firstName = document.getElementById("register_name").value;
+    const secondName = document.getElementById("register_second_name").value;
+    const lastName = document.getElementById("register_last_name").value;
+    const secondLastName = document.getElementById("register_second_last_name").value;
+
+    // Validación extra: Confirmación de contraseña
+    if (password !== confirmPassword) {
+        showToast("Las contraseñas no coinciden", "warning");
+        registerButton.innerHTML = '<span class="position-relative">Registrarse</span>';
+        registerButton.disabled = false;
+        return;
+    }
+
+    // Enviar datos al servidor
+    const response = await fetch("/user/auth/register/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, first_name: firstName, second_name: secondName, first_last_name: lastName, second_last_name: secondLastName }),
+        credentials: "include"  // NECESARIO para cookies
+    });
+
+    if (response.ok) {
+        showToast("Usuario registrado correctamente, ingrese sus credenciales para continuar", "success");
+        //window.location.href = "/user/dashboard/";
+        showForm("login");
+        registerButton.disabled = false;
+        registerButton.innerHTML = '<span class="position-relative">Registrarse</span>';
+        document.getElementById("registerForm").reset();        
+    } else {
+        registerButton.innerHTML = '<span class="position-relative">Registrarse</span>';
+        registerButton.disabled = false;
+        showToast("Error al registrar usuario", "danger");
+    }
+});
+
+
+</script>
 </html>

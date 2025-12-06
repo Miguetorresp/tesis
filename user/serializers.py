@@ -10,7 +10,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'email', 'password', 'first_name',
-            'first_last_name', 'cellphone',
+            'first_last_name', 'second_name', 'second_last_name', 'cellphone',
         ]
 
     def create(self, validated_data):
@@ -18,12 +18,30 @@ class RegisterSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             first_name=validated_data['first_name'],
             first_last_name=validated_data['first_last_name'],
-            cellphone=validated_data.get('cellphone', None)
+            second_name=validated_data.get('second_name', None),
+            second_last_name=validated_data.get('second_last_name', None),
+            cellphone=validated_data.get('cellphone', None),
+            role_id='2',  # Asignar rol por defecto
         )
         user.set_password(validated_data['password'])  # muy importante
         user.save()
         return user
     
+class UserSerializer(serializers.ModelSerializer):
+    # Si quieres añadir full_name:
+    full_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        # Asegúrate de que estos campos existan en tu modelo
+        fields = ("user_id", "email", "first_name", "first_last_name", "role_id", "status", "full_name")
+
+    def get_full_name(self, obj):
+        # ajusta a los nombres reales de tus campos
+        return f"{obj.first_name or ''} {obj.first_last_name or ''}".strip()
+
+    
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -44,17 +62,14 @@ class LoginSerializer(serializers.Serializer):
         # Generar tokens JWT
         refresh = RefreshToken.for_user(user)
 
+        # Serializar usuario
+        user_data = UserSerializer(user).data
+
+        # Retornar el objeto user REAL y también el diccionario serializado
         return {
             "refresh": str(refresh),
             "access": str(refresh.access_token),
-            "user": {
-                "user_id": user.user_id,
-                "email": user.email,
-                "first_name": user.first_name,
-                "first_last_name": user.first_last_name,
-                "role": user.role_id,
-                "status": user.status,
-            }
+            "user": user,           # <-- OBJETO REAL
+            "user_data": user_data  # <-- SERIALIZADO
         }
-
 

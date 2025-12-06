@@ -1,0 +1,129 @@
+<header class="main-header">
+  <div class="header-content">
+    <!-- Toggle Sidebar Button -->
+    <button class="btn btn-link toggle-sidebar" id="toggleSidebar">
+      <i class="bi bi-list fs-4"></i>
+    </button>
+
+    <!-- Título de la página -->
+    <div class="page-title-section d-none d-md-block">
+      <h4 class="page-title mb-0">{% block page_title %}{% endblock %}</h4>
+    </div>
+
+    <!-- Spacer -->
+    <div class="flex-grow-1"></div>
+
+    <!-- Barra de búsqueda -->
+    <div class="search-box d-none d-lg-block">
+      <div class="input-group">
+        <span class="input-group-text bg-transparent border-end-0">
+          <i class="bi bi-search"></i>
+        </span>
+        <input
+          type="text"
+          class="form-control border-start-0 ps-0"
+          placeholder="Buscar..."
+        />
+      </div>
+    </div>
+
+    <!-- Acciones del Header -->
+    <div class="header-actions">
+      <!-- Notificaciones -->
+      <div class="dropdown">
+        <button
+          class="btn btn-link position-relative"
+          type="button"
+          data-bs-toggle="dropdown"
+        >
+          <i class="bi bi-bell fs-5"></i>
+          <span
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+          >
+            3
+          </span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end notifications-dropdown">
+          <li class="dropdown-header">
+            <strong>Notificaciones</strong>
+          </li>
+          <li><hr class="dropdown-divider" /></li>
+          <li>
+            <a class="dropdown-item" href="#">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-info-circle text-primary me-2"></i>
+                <div class="flex-grow-1">
+                  <p class="mb-0 small">Nueva actualización disponible</p>
+                  <small class="text-muted">Hace 5 min</small>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#">
+              <div class="d-flex align-items-start">
+                <i class="bi bi-person-plus text-success me-2"></i>
+                <div class="flex-grow-1">
+                  <p class="mb-0 small">Nuevo usuario registrado</p>
+                  <small class="text-muted">Hace 1 hora</small>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li><hr class="dropdown-divider" /></li>
+          <li>
+            <a class="dropdown-item text-center small" href="#">Ver todas</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Settings -->
+      <button class="btn btn-link" type="button">
+        <i class="bi bi-gear fs-5"></i>
+      </button>
+
+      <!-- Usuario -->
+      <div class="dropdown">
+        <button
+          class="btn btn-link user-menu"
+          type="button"
+          data-bs-toggle="dropdown"
+        >
+          <span class="user-name d-none d-md-inline">
+            {% if user.full_name %} {{ user.full_name }} {% else %} Usuario {%
+            endif %}
+          </span>
+          <i class="bi bi-chevron-down ms-1"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <div class="dropdown-header">
+              <strong>
+                {% if user.full_name %} {{ user.full_name }} {% else %} Usuario
+                {% endif %}
+              </strong>
+              <p class="mb-0 small text-muted">{{ user.email }}</p>
+            </div>
+          </li>
+          <li><hr class="dropdown-divider" /></li>
+          <li>
+            <a class="dropdown-item" href="/profile/"
+              ><i class="bi bi-person me-2"></i> Mi Perfil</a
+            >
+          </li>
+          <li>
+            <a class="dropdown-item" href="/settings/"
+              ><i class="bi bi-gear me-2"></i> Configuración</a
+            >
+          </li>
+          <li><hr class="dropdown-divider" /></li>
+          <li>
+            <a class="dropdown-item text-danger" href="/user/auth/logout/"
+              ><i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>

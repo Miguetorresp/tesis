@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Dashboard{% endblock %}</title>
+</head>
+
+<body>
+
+    <!-- 🔵 MENÚ GLOBAL -->
+    <nav>
+        <ul>
+            
+            <li><a href="/user/dashboard/">Dashboard</a></li>
+            <li><a href="/user/profile/">Perfil</a></li>
+
+            {% if request.user.role_id == 1 %}
+                <!-- Admin -->
+                <li><a href="/admin/users/">Usuarios</a></li>
+                <li><a href="/admin/settings/">Configuración</a></li>
+            {% endif %}
+
+            {% comment %} {% if request.user.role_id in [1, 2] %} {% endcomment %}
+                <!-- Admin y Supervisor -->
+                <li><a href="/reports/">Reportes</a></li>
+            {% comment %} {% endif %} {% endcomment %}
+        </ul>
+    </nav>
+
+    <hr>
+
+    <!-- 🔵 CONTENIDO DINÁMICO -->
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>
