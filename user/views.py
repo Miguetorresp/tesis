@@ -45,7 +45,7 @@ class LoginView(APIView):
             "email": user.email,
             "first_name": user.first_name,
             "first_last_name": user.first_last_name,
-            "role": user.role_id,
+            "role": user.groups.first().name if user.groups.exists() else None,
             "status": user.status,
             "full_name": f"{user.first_name} {user.first_last_name}".strip(),
             # "usuario": user
@@ -58,7 +58,7 @@ class LoginView(APIView):
         response = Response(
             {
                 "message": "Login exitoso",
-                "user": user_data
+                "user": user_data,
             },
             status=200
         )

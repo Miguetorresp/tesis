@@ -90,8 +90,8 @@
           data-bs-toggle="dropdown"
         >
           <span class="user-name d-none d-md-inline">
-            {% if user.full_name %} {{ user.full_name }} {% else %} Usuario {%
-            endif %}
+            {% if user.full_name %} {{ user.full_name }} {% else %} Usuario 
+            {% endif %}
           </span>
           <i class="bi bi-chevron-down ms-1"></i>
         </button>
@@ -99,7 +99,7 @@
           <li>
             <div class="dropdown-header">
               <strong>
-                {% if user.full_name %} {{ user.full_name }} {% else %} Usuario
+                {% if user.role %} {{ user.role }} {% else %} Usuario
                 {% endif %}
               </strong>
               <p class="mb-0 small text-muted">{{ user.email }}</p>

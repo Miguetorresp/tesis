@@ -1,0 +1,194 @@
+from django.db import models
+from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator, MaxValueValidator
+
+User = get_user_model()
+
+
+class Species(models.Model):
+    """Especies de mascotas (Perro, Gato, etc.)"""
+    name = models.CharField(max_length=50, unique=True, verbose_name='Especie')
+    description = models.TextField(blank=True, verbose_name='Descripción')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Especie'
+        verbose_name_plural = 'Especies'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class Breed(models.Model):
+    """Razas de mascotas"""
+    species = models.ForeignKey(Species, on_delete=models.CASCADE, related_name='breeds', verbose_name='Especie')
+    name = models.CharField(max_length=100, verbose_name='Raza')
+    description = models.TextField(blank=True, verbose_name='Descripción')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Raza'
+        verbose_name_plural = 'Razas'
+        ordering = ['species', 'name']
+        unique_together = ['species', 'name']
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class Pet(models.Model):
+    """Mascota disponible para adopción"""
+
+    SIZE_CHOICES = [
+        ('small', 'Pequeño (0-10 kg)'),
+        ('medium', 'Mediano (11-25 kg)'),
+        ('large', 'Grande (26-45 kg)'),
+        ('xlarge', 'Extra Grande (45+ kg)'),
+    ]
+
+    SEX_CHOICES = [
+        ('M', 'Macho'),
+        ('F', 'Hembra'),
+    ]
+
+    STATUS_CHOICES = [
+        ('available', 'Disponible'),
+        ('pending', 'Adopción Pendiente'),
+        ('adopted', 'Adoptado'),
+        ('unavailable', 'No Disponible'),
+    ]
+
+    HEALTH_STATUS_CHOICES = [
+        ('healthy', 'Saludable'),
+        ('treatment', 'En Tratamiento'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='pets', verbose_name='Usuario')
+
+    # Relaciones
+    species = models.ForeignKey(Species, on_delete=models.PROTECT, related_name='pets', verbose_name='Especie')
+    breed = models.ForeignKey(Breed, on_delete=models.SET_NULL, null=True, blank=True, related_name='pets',
+                              verbose_name='Raza')
+
+    # Información básica
+    name = models.CharField(max_length=100, verbose_name='Nombre')
+    age_years = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(30)],
+        verbose_name='Edad (años)',
+        help_text='Edad aproximada en años'
+    )
+    age_months = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(11)],
+        default=0,
+        verbose_name='Meses adicionales',
+        help_text='Meses adicionales (0-11)'
+    )
+    sex = models.CharField(max_length=1, choices=SEX_CHOICES, verbose_name='Sexo')
+    size = models.CharField(max_length=10, choices=SIZE_CHOICES, verbose_name='Tamaño')
+    color = models.CharField(max_length=100, verbose_name='Color')
+    weight = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name='Peso (kg)'
+    )
+
+    # Descripción y características
+    description = models.TextField(verbose_name='Descripción general')
+    # personality = models.TextField(verbose_name='Personalidad', help_text='Temperamento y comportamiento')
+    # special_needs = models.TextField(blank=True, verbose_name='Necesidades especiales')
+
+    # Estado de salud
+    health_status = models.CharField(
+        max_length=20,
+        choices=HEALTH_STATUS_CHOICES,
+        default='healthy',
+        verbose_name='Estado de salud'
+    )
+    vaccinated = models.BooleanField(default=False, verbose_name='Vacunado')
+    sterilized = models.BooleanField(default=False, verbose_name='Esterilizado')
+    dewormed = models.BooleanField(default=False, verbose_name='Desparasitado')
+    microchipped = models.BooleanField(default=False, verbose_name='Con microchip')
+
+    # Compatibilidad
+    good_with_kids = models.BooleanField(default=True, verbose_name='Bueno con niños')
+    good_with_dogs = models.BooleanField(default=True, verbose_name='Bueno con perros')
+    good_with_cats = models.BooleanField(default=True, verbose_name='Bueno con gatos')
+
+    # Estado y metadata
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='available',
+        verbose_name='Estado'
+    )
+    # rescue_date = models.DateField(verbose_name='Fecha de rescate', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de registro')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Última actualización')
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='pets_created',
+        verbose_name='Creado por'
+    )
+
+    # Featured
+    # is_featured = models.BooleanField(default=False, verbose_name='Destacado')
+    # views_count = models.IntegerField(default=0, verbose_name='Número de vistas')
+
+    class Meta:
+        verbose_name = 'Mascota'
+        verbose_name_plural = 'Mascotas'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', '-created_at']),
+            models.Index(fields=['species', 'status']),
+        ]
+
+    def __str__(self):
+        return f"{self.name} - {self.species.name}"
+
+    @property
+    def age_display(self):
+        """Retorna la edad en formato legible"""
+        if self.age_years == 0:
+            return f"{self.age_months} meses"
+        elif self.age_months == 0:
+            return f"{self.age_years} {'año' if self.age_years == 1 else 'años'}"
+        else:
+            return f"{self.age_years} {'año' if self.age_years == 1 else 'años'} y {self.age_months} {'mes' if self.age_months == 1 else 'meses'}"
+
+    @property
+    def primary_image(self):
+        """Retorna la imagen principal"""
+        return self.images.filter(is_primary=True).first() or self.images.first()
+
+    def increment_views(self):
+        """Incrementa el contador de vistas"""
+        self.views_count += 1
+        self.save(update_fields=['views_count'])
+
+
+class PetImage(models.Model):
+    """Imágenes de mascotas"""
+    pet = models.ForeignKey(Pet, on_delete=models.CASCADE, related_name='images', verbose_name='Mascota')
+    image = models.ImageField(upload_to='pets/%Y/%m/%d/', verbose_name='Imagen')
+    is_primary = models.BooleanField(default=False, verbose_name='Imagen principal')
+    caption = models.CharField(max_length=200, blank=True, verbose_name='Descripción')
+    uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de subida')
+
+    class Meta:
+        verbose_name = 'Imagen de Mascota'
+        verbose_name_plural = 'Imágenes de Mascotas'
+        ordering = ['-is_primary', 'uploaded_at']
+
+    def __str__(self):
+        return f"Imagen de {self.pet.name}"
+
+    def save(self, *args, **kwargs):
+        # Si esta imagen se marca como principal, desmarcar las demás
+        if self.is_primary:
+            PetImage.objects.filter(pet=self.pet, is_primary=True).update(is_primary=False)
+        super().save(*args, **kwargs)

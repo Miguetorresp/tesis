@@ -1,0 +1,435 @@
+{% extends 'pets/base.html' %}
+
+{% block title %}Mascotas en Adopción{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 30px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .hero-section h1 {
+        color: var(--primary-color);
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+    
+    .search-section {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .pet-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        height: 100%;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .pet-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }
+    
+    .pet-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .pet-card:hover .pet-image {
+        transform: scale(1.1);
+    }
+    
+    .pet-image-container {
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .pet-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: var(--success-color);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.85rem;
+    }
+    
+    .pet-info {
+        padding: 20px;
+    }
+    
+    .pet-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .pet-details {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .pet-detail-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #f8f9fa;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .pet-detail-item i {
+        color: var(--primary-color);
+    }
+    
+    .pet-description {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 15px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .health-icons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .health-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+    
+    .health-icon.active {
+        background: var(--success-color);
+        color: white;
+    }
+    
+    .health-icon.inactive {
+        background: #e0e0e0;
+        color: #999;
+    }
+    
+    .btn-view-details {
+        width: 100%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-view-details:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .no-results i {
+        font-size: 5rem;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+    
+    .pagination {
+        margin-top: 40px;
+        justify-content: center;
+    }
+    
+    .page-link {
+        color: var(--primary-color);
+        border-radius: 10px;
+        margin: 0 5px;
+    }
+    
+    .page-link:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        border: none;
+    }
+    
+    .filter-btn {
+        border-radius: 10px;
+    }
+    
+    .total-count {
+        background: var(--success-color);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        display: inline-block;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1><i class="bi bi-heart-fill"></i> Encuentra tu Compañero Perfecto</h1>
+        <p class="lead">{{ total_pets }} mascotas esperan por un hogar lleno de amor</p>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-section">
+        <form method="get" id="searchForm">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-search"></i> Buscar</label>
+                    {{ form.search }}
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label"><i class="bi bi-tag"></i> Especie</label>
+                    {{ form.species }}
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label"><i class="bi bi-gender-ambiguous"></i> Sexo</label>
+                    {{ form.sex }}
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label"><i class="bi bi-arrows-expand"></i> Tamaño</label>
+                    {{ form.size }}
+                </div>
+                
+                <div class="col-md-1">
+                    <label class="form-label">Edad Min</label>
+                    {{ form.age_min }}
+                </div>
+                
+                <div class="col-md-1">
+                    <label class="form-label">Edad Max</label>
+                    {{ form.age_max }}
+                </div>
+                
+                <div class="col-md-1">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100 filter-btn">
+                        <i class="bi bi-funnel"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="form-check form-check-inline">
+                        {{ form.vaccinated }}
+                        <label class="form-check-label" for="{{ form.vaccinated.id_for_label }}">
+                            <i class="bi bi-shield-check"></i> Vacunados
+                        </label>
+                    </div>
+                    
+                    <div class="form-check form-check-inline">
+                        {{ form.sterilized }}
+                        <label class="form-check-label" for="{{ form.sterilized.id_for_label }}">
+                            <i class="bi bi-heart-pulse"></i> Esterilizados
+                        </label>
+                    </div>
+                    
+                    <a href="{% url 'pets:list' %}" class="btn btn-sm btn-outline-secondary ms-3">
+                        <i class="bi bi-x-circle"></i> Limpiar filtros
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Count -->
+    {% if page_obj.object_list %}
+        <div class="text-center mb-4">
+            <span class="total-count">
+                <i class="bi bi-grid"></i> Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ total_pets }} mascotas
+            </span>
+        </div>
+    {% endif %}
+
+    <!-- Pet Grid -->
+    <div class="row g-4">
+        {% for pet in page_obj %}
+            <div class="col-lg-4 col-md-6">
+                <div class="pet-card">
+                    <div class="pet-image-container">
+                        {% if pet.primary_image %}
+                            <img src="{{ pet.primary_image.image.url }}" alt="{{ pet.name }}" class="pet-image">
+                        {% else %}
+                            <img src="https://via.placeholder.com/400x300?text=Sin+Imagen" alt="{{ pet.name }}" class="pet-image">
+                        {% endif %}
+                        
+                        {% if pet.is_featured %}
+                            <span class="pet-badge">
+                                <i class="bi bi-star-fill"></i> Destacado
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="pet-info">
+                        <h3 class="pet-name">{{ pet.name }}</h3>
+                        
+                        <div class="pet-details">
+                            <span class="pet-detail-item">
+                                <i class="bi bi-tag"></i> {{ pet.species.name }}
+                            </span>
+                            {% if pet.breed %}
+                                <span class="pet-detail-item">
+                                    <i class="bi bi-bookmark"></i> {{ pet.breed.name }}
+                                </span>
+                            {% endif %}
+                            <span class="pet-detail-item">
+                                <i class="bi bi-calendar"></i> {{ pet.age_display }}
+                            </span>
+                            <span class="pet-detail-item">
+                                <i class="bi bi-gender-{% if pet.sex == 'M' %}male{% else %}female{% endif %}"></i>
+                                {{ pet.get_sex_display }}
+                            </span>
+                            <span class="pet-detail-item">
+                                <i class="bi bi-arrows-expand"></i> {{ pet.get_size_display }}
+                            </span>
+                        </div>
+                        
+                        <p class="pet-description">{{ pet.description|truncatewords:20 }}</p>
+                        
+                        <div class="health-icons">
+                            <span class="health-icon {% if pet.vaccinated %}active{% else %}inactive{% endif %}" 
+                                  title="{% if pet.vaccinated %}Vacunado{% else %}No vacunado{% endif %}">
+                                <i class="bi bi-shield-check"></i>
+                            </span>
+                            <span class="health-icon {% if pet.sterilized %}active{% else %}inactive{% endif %}"
+                                  title="{% if pet.sterilized %}Esterilizado{% else %}No esterilizado{% endif %}">
+                                <i class="bi bi-heart-pulse"></i>
+                            </span>
+                            <span class="health-icon {% if pet.dewormed %}active{% else %}inactive{% endif %}"
+                                  title="{% if pet.dewormed %}Desparasitado{% else %}No desparasitado{% endif %}">
+                                <i class="bi bi-bug"></i>
+                            </span>
+                            <span class="health-icon {% if pet.microchipped %}active{% else %}inactive{% endif %}"
+                                  title="{% if pet.microchipped %}Con microchip{% else %}Sin microchip{% endif %}">
+                                <i class="bi bi-cpu"></i>
+                            </span>
+                        </div>
+                        
+                        <a href="{% url 'pets:detail' pet.pk %}" class="btn btn-view-details">
+                            <i class="bi bi-eye"></i> Ver Detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="no-results">
+                    <i class="bi bi-search"></i>
+                    <h3>No se encontraron mascotas</h3>
+                    <p class="text-muted">Intenta ajustar tus filtros de búsqueda</p>
+                    <a href="{% url 'pets:list' %}" class="btn btn-primary mt-3">
+                        <i class="bi bi-arrow-clockwise"></i> Ver todas las mascotas
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <nav aria-label="Navegación de páginas">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                {{ num }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-submit form on filter change
+    document.querySelectorAll('#searchForm select').forEach(select => {
+        select.addEventListener('change', function() {
+            document.getElementById('searchForm').submit();
+        });
+    });
+</script>
+{% endblock %}

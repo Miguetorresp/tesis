@@ -16,13 +16,20 @@
 }
 
 .btn-primary:hover {
-    background-color: #162f6b !important; /* azul más oscuro */
+    background-color: #162f6b !important;
+    /* azul más oscuro */
     border-color: #162f6b !important;
 }
 
 .btn-secondary {
     background-color: var(--bs-secondary) !important;
     border-color: var(--bs-secondary) !important;
+}
+
+.btn-secondary:hover {
+    background-color: #1e40af !important;
+    /* azul más oscuro */
+    border-color: #1e40af !important;
 }
 
 body {

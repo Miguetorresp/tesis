@@ -476,7 +476,7 @@ document.getElementById("registerForm").addEventListener("submit", async e => {
 
     if (response.ok) {
         showToast("Usuario registrado correctamente, ingrese sus credenciales para continuar", "success");
-        //window.location.href = "/user/dashboard/";
+        window.location.href = "/user/dashboard/";
         showForm("login");
         registerButton.disabled = false;
         registerButton.innerHTML = '<span class="position-relative">Registrarse</span>';

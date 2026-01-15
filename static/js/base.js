@@ -1,15 +1,15 @@
 // ========================================
 // SIDEBAR TOGGLE
 // ========================================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggleSidebar');
     const overlay = document.getElementById('sidebarOverlay');
     const mainContent = document.getElementById('mainContent');
-    
+
     // Toggle sidebar
     if (toggleBtn) {
-        toggleBtn.addEventListener('click', function() {
+        toggleBtn.addEventListener('click', function () {
             if (window.innerWidth <= 991) {
                 // Mobile: Mostrar/ocultar sidebar
                 sidebar.classList.toggle('active');
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 // Desktop: Colapsar/expandir sidebar
                 sidebar.classList.toggle('collapsed');
-                
+
                 // Cerrar todos los submenús cuando se colapsa
                 if (sidebar.classList.contains('collapsed')) {
                     const openSubmenus = sidebar.querySelectorAll('.submenu.show');
@@ -30,40 +30,40 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     });
                 }
-                
+
                 // Guardar preferencia en localStorage
                 const isCollapsed = sidebar.classList.contains('collapsed');
                 localStorage.setItem('sidebarCollapsed', isCollapsed);
             }
         });
     }
-    
+
     // Cerrar sidebar al hacer click en overlay (mobile)
     if (overlay) {
-        overlay.addEventListener('click', function() {
+        overlay.addEventListener('click', function () {
             sidebar.classList.remove('active');
             overlay.classList.remove('active');
             document.body.style.overflow = '';
         });
     }
-    
+
     // Restaurar estado del sidebar desde localStorage
     const savedState = localStorage.getItem('sidebarCollapsed');
     if (savedState === 'true' && window.innerWidth > 991) {
         sidebar.classList.add('collapsed');
     }
-    
+
     // Manejar resize de ventana
     let resizeTimer;
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', function () {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
+        resizeTimer = setTimeout(function () {
             if (window.innerWidth > 991) {
                 // Desktop: restaurar estado guardado
                 sidebar.classList.remove('active');
                 overlay.classList.remove('active');
                 document.body.style.overflow = '';
-                
+
                 const savedState = localStorage.getItem('sidebarCollapsed');
                 if (savedState === 'true') {
                     sidebar.classList.add('collapsed');
@@ -74,33 +74,49 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 250);
     });
-    
+
     // ========================================
     // ACTIVE LINK
     // ========================================
     const currentPath = window.location.pathname;
     const navLinks = document.querySelectorAll('.nav-link:not([data-bs-toggle])');
-    
+
+    // Primero, remover active de todos los links
+    navLinks.forEach(l => l.classList.remove('active'));
+
+    // Encontrar la mejor coincidencia (más específica)
+    let bestMatch = null;
+    let bestMatchLength = 0;
+
     navLinks.forEach(link => {
         const href = link.getAttribute('href');
-        if (href && href !== '#' && currentPath.includes(href)) {
-            // Remover active de todos
-            navLinks.forEach(l => l.classList.remove('active'));
-            // Agregar active al link actual
-            link.classList.add('active');
-            
-            // Si está en un submenu, expandirlo
-            const collapse = link.closest('.collapse');
-            if (collapse) {
-                collapse.classList.add('show');
-                const toggleLink = document.querySelector(`[data-bs-target="#${collapse.id}"]`);
-                if (toggleLink) {
-                    toggleLink.setAttribute('aria-expanded', 'true');
+        if (href && href !== '#') {
+            // Verificar si el path actual comienza con el href del link
+            if (currentPath.startsWith(href) || currentPath === href) {
+                // Guardar el link con el match más largo (más específico)
+                if (href.length > bestMatchLength) {
+                    bestMatch = link;
+                    bestMatchLength = href.length;
                 }
             }
         }
     });
-    
+
+    // Activar el mejor match encontrado
+    if (bestMatch) {
+        bestMatch.classList.add('active');
+
+        // Si está en un submenu, expandirlo
+        const collapse = bestMatch.closest('.collapse');
+        if (collapse) {
+            collapse.classList.add('show');
+            const toggleLink = document.querySelector(`[data-bs-target="#${collapse.id}"]`);
+            if (toggleLink) {
+                toggleLink.setAttribute('aria-expanded', 'true');
+            }
+        }
+    }
+
     // ========================================
     // MANEJAR SUBMENUS - Sin movimiento de scroll
     // ========================================
@@ -108,57 +124,57 @@ document.addEventListener('DOMContentLoaded', function() {
     submenuToggles.forEach(toggle => {
         const targetId = toggle.getAttribute('data-bs-target');
         const target = document.querySelector(targetId);
-        
+
         if (target) {
             // Prevenir el comportamiento por defecto de Bootstrap collapse
-            toggle.addEventListener('click', function(e) {
+            toggle.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 // Si el sidebar está colapsado, no hacer nada
                 if (sidebar.classList.contains('collapsed')) {
                     return;
                 }
-                
+
                 const sidebarNav = document.querySelector('.sidebar-nav');
                 const isExpanded = target.classList.contains('show');
-                
+
                 // Bloquear temporalmente el scroll
                 const scrollTop = sidebarNav.scrollTop;
                 sidebarNav.style.overflow = 'hidden';
-                
+
                 // Toggle el submenu
                 target.classList.toggle('show');
                 this.setAttribute('aria-expanded', !isExpanded);
-                
+
                 // Forzar la posición del scroll inmediatamente
                 sidebarNav.scrollTop = scrollTop;
-                
+
                 // Restaurar overflow después de la animación
                 setTimeout(() => {
                     sidebarNav.style.overflow = 'auto';
                     sidebarNav.scrollTop = scrollTop;
                 }, 350);
             });
-            
+
             // Prevenir eventos de Bootstrap que causan scroll
-            target.addEventListener('show.bs.collapse', function(e) {
+            target.addEventListener('show.bs.collapse', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
             });
-            
-            target.addEventListener('shown.bs.collapse', function(e) {
+
+            target.addEventListener('shown.bs.collapse', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
             });
         }
     });
-    
+
     // ========================================
     // SMOOTH SCROLL
     // ========================================
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
+        anchor.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
             if (href !== '#' && document.querySelector(href)) {
                 e.preventDefault();
@@ -168,24 +184,24 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // ========================================
     // TOOLTIPS & POPOVERS (Bootstrap 5)
     // ========================================
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function(tooltipTriggerEl) {
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
-    
+
     const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-    popoverTriggerList.map(function(popoverTriggerEl) {
+    popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl);
     });
-    
+
     // ========================================
     // CERRAR DROPDOWNS AL HACER CLICK FUERA
     // ========================================
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (!e.target.closest('.dropdown')) {
             const dropdowns = document.querySelectorAll('.dropdown-menu.show');
             dropdowns.forEach(dropdown => {
@@ -211,7 +227,7 @@ function showToast(message, type = 'info') {
         toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
         document.body.appendChild(toastContainer);
     }
-    
+
     // Crear toast
     const toastId = 'toast-' + Date.now();
     const bgClass = {
@@ -248,7 +264,7 @@ function showToast(message, type = 'info') {
         'warning': '#FFF2C7',
         'info': '#D2F4FB'
     }[type] || '#D2F4FB';
-    
+
     const textColor = {
         'success': 'text-success',
         'error': 'text-danger',
@@ -278,15 +294,15 @@ function showToast(message, type = 'info') {
       </div>
     </div>
     `
-    
+
     toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-    
+
     const toastElement = document.getElementById(toastId);
     const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
     toast.show();
-    
+
     // Remover del DOM después de ocultarse
-    toastElement.addEventListener('hidden.bs.toast', function() {
+    toastElement.addEventListener('hidden.bs.toast', function () {
         toastElement.remove();
     });
 }

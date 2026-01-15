@@ -34,7 +34,22 @@
                 <i class="bi bi-house-door"></i>
                 <span class="nav-text">Dashboards</span>
             </a>
+
+            <a href="{% url 'pets:my_pets' %}" class="nav-link">
+                <i class="bi bi-heart"></i>
+                <span class="nav-text">Mis mascotas</span>
+            </a>
             
+            <a href="{% url 'pets:list' %}" class="nav-link">
+                <i class="bi bi-bar-chart"></i>
+                <span class="nav-text">Adopción</span>
+            </a>
+            
+            <a href="#" class="nav-link">
+                <i class="bi bi-cart"></i>
+                <span class="nav-text">Perdidos</span>
+            </a>
+
             <a href="#salesSubmenu" class="nav-link" data-bs-toggle="collapse">
                 <i class="bi bi-graph-up"></i>
                 <span class="nav-text">Sales</span>
@@ -48,66 +63,6 @@
                     <span class="nav-text">Reports</span>
                 </a>
             </div>
-
-            <a href="#" class="nav-link">
-                <i class="bi bi-bar-chart"></i>
-                <span class="nav-text">Analytics</span>
-            </a>
-            
-            <a href="#" class="nav-link">
-                <i class="bi bi-cart"></i>
-                <span class="nav-text">Ecommerce</span>
-            </a>
-            
-            <a href="#" class="nav-link">
-                <i class="bi bi-people"></i>
-                <span class="nav-text">CRM</span>
-            </a>
-            
-            <a href="#" class="nav-link">
-                <i class="bi bi-currency-bitcoin"></i>
-                <span class="nav-text">Crypto</span>
-            </a>
-            
-            <a href="#" class="nav-link">
-                <i class="bi bi-diamond"></i>
-                <span class="nav-text">NFT</span>
-            </a>
-            
-            <a href="#" class="nav-link">
-                <i class="bi bi-folder"></i>
-                <span class="nav-text">Projects</span>
-            </a>
-            
-            <a href="#" class="nav-link">
-                <i class="bi bi-briefcase"></i>
-                <span class="nav-text">Jobs</span>
-            </a>
-            
-            <a href="#" class="nav-link">
-                <i class="bi bi-person-badge"></i>
-                <span class="nav-text">HRM</span>
-            </a>
-            
-            <a href="#" class="nav-link">
-                <i class="bi bi-book"></i>
-                <span class="nav-text">Courses</span>
-            </a>
-            
-            <a href="#" class="nav-link">
-                <i class="bi bi-graph-up-arrow"></i>
-                <span class="nav-text">Stocks</span>
-            </a>
-            
-            <a href="#" class="nav-link">
-                <i class="bi bi-heart-pulse"></i>
-                <span class="nav-text">Medical</span>
-            </a>
-            
-            <a href="#" class="nav-link">
-                <i class="bi bi-shop"></i>
-                <span class="nav-text">POS System</span>
-            </a>
         </div>
 
         {% if user.role_id == 1 %}

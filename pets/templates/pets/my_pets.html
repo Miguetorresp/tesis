@@ -1,0 +1,559 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %} Mis mascotas {% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-minimal">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="bi bi-house-door"></i> Inicio</a></li>
+            <li class="breadcrumb-item"><a href="#">Mis mascotas</a></li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">Mis mascotas</h2>
+            <p class="fw-lighter mb-0">Gestiona el perfil de tus amigos peludos</p>
+        </div>
+
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#petModal">
+            <i class="bi bi-plus-lg"></i> Agregar mascota
+        </button>
+    </div>
+    <div class="text-primary">
+        <hr>
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-6">
+            <form method="get" class="d-flex">
+                <label for="searchPet" class="form-label visually-hidden">Buscar mascota</label>
+                <div class="input-group">
+                    <input type="text"
+                           name="q"
+                           id="searchPet"
+                           class="form-control"
+                           placeholder="Buscar mascota por nombre..."
+                           aria-label="Buscar mascota"
+                           aria-describedby="basic-addon1"
+                           value="{{ query }}">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+                {% if query %}
+                    <button class="btn btn-outline-dark ms-3 clear-search-btn" type="button" data-bs-toggle="tooltip"
+                            data-bs-placement="right" title="Eliminar Filtro"><i class="bi bi-x-circle"></i>
+                    </button>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        {% if pets %}
+            <div id="petsContainer" class="row">
+                {% for pet in pets %}
+                    <div class="col-12 col-md-3 col-sm-6 col-xs-6 mt-3 pet-card">
+                        <div class="card mb-4 h-100 shadow-sm zoom-card">
+                            <div class="position-relative">
+                                {% if pet.photo %}
+                                    <img src="{{ pet.photo.url }}" class="card-img-top" alt="Foto de {{ pet.name }}">
+                                {% else %}
+                                    <img src="{% static 'images/default_pet.png' %}" class="card-img-top"
+                                         alt="Foto por defecto">
+                                {% endif %}
+                                <span class="badge bg-dark text-uppercase position-absolute top-0 end-0 m-2 px-3 py-2 opacity-75">
+                            {{ pet.species }}
+                        </span>
+                            </div>
+                            <div class="card-body align-content-center">
+                                <h5 class="card-title mb-1">
+                                    {% if pet.sex == "M" %}
+                                        <i class="bi bi-gender-male text-blue"></i>
+                                    {% elif pet.sex == "F" %}
+                                        <i class="bi bi-gender-female text-pink"></i>
+                                    {% else %}
+                                        <i class="bi bi-gender-ambiguous"></i>
+                                    {% endif %}
+                                    {{ pet.name }}
+                                </h5>
+                                <p class="card-text mb-2">{{ pet.breed|default:"Sin raza" }}</p>
+                            </div>
+                            <div class="card-footer border-0 d-flex px-3">
+                                <button class="btn btn-primary btn-custom flex-grow-1 me-2 nowrap edit-pet-btn"
+                                        data-id="{{ pet.id }}">
+                                    <i class="bi bi-pencil me-1"></i> Editar
+                                </button>
+                                <button class="btn btn-outline-danger btn-custom delete-pet-btn" data-id="{{ pet.id }}"
+                                        title="Eliminar" style="width: 45px;">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="col-12 mt-lg-5 text-muted text-center">
+                <i class="bi bi-folder-x fs-1"></i>
+                <p>No se encontraron mascotas</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if pets.has_other_pages %}
+        <nav aria-label="Paginación de mascotas">
+            <ul class="pagination justify-content-center mt-4">
+                {% if pets.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&page={{ pets.previous_page_number }}"
+                           aria-label="Anterior">
+                            <span aria-hidden="true">Anterior</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Anterior</span>
+                    </li>
+                {% endif %}
+
+                {% for num in pets.paginator.page_range %}
+                    {% if pets.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > pets.number|add:'-3' and num < pets.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?q={{ query }}&page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pets.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&page={{ pets.next_page_number }}"
+                           aria-label="Siguiente">
+                            <span aria-hidden="true">Siguiente</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Siguiente</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+
+
+    <div class="modal fade" id="petModal" tabindex="-1" aria-labelledby="modalTitlePet" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h1 class="modal-title fs-5" id="modalTitlePet">Agregar Mascota</h1>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="petForm" method="post" action="{% url 'pets:create' %}" class="row needs-validation"
+                          novalidate>
+                        {% csrf_token %}
+                        <!-- Información básica -->
+                        <input type="hidden" name="pet_id" id="pet_id">
+
+                        <div class="section-divider mt-4">
+                            <div class="icon-wrapper">
+                                <i class="bi bi-info-circle"></i>
+                            </div>
+                            <h6 class="text-uppercase text-primary small">Información básica</h6>
+                        </div>
+                        <div class="row m-0">
+                            <div class="col-md-6 mt-0">
+                                <label class="form-label">Nombre</label>
+                                <input name="name" type="text" class="form-control" placeholder="Ej: Luna" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Especie</label>
+                                <select name="species" class="form-select" required>
+                                    <option value="">Seleccionar</option>
+                                    {% for s in species %}
+                                        <option value="{{ s.id }}">{{ s.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Raza</label>
+                                <select class="form-select">
+                                    <option value="">Opcional</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Edad y características físicas -->
+                        <div class="section-divider">
+                            <div class="icon-wrapper">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                            <h6 class="text-uppercase text-primary small">Edad y características físicas</h6>
+                        </div>
+                        <div class="row m-0">
+                            <div class="col-md-3">
+                                <label class="form-label">Años</label>
+                                <input name="age_years" type="number" min="0" max="30" class="form-control"
+                                       placeholder="0" required>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Meses</label>
+                                <input name="age_months" type="number" min="0" max="11" class="form-control"
+                                       placeholder="0" required>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Sexo</label>
+                                <select name="sex" class="form-select" required>
+                                    <option value="">Seleccionar</option>
+                                    {% for s in sex_choices %}
+                                        <option value="{{ s.0 }}">{{ s.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Tamaño</label>
+                                <select name="size" class="form-select" required>
+                                    <option value="">Seleccionar</option>
+                                    {% for s in size_choices %}
+                                        <option value="{{ s.0 }}">{{ s.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row m-0">
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label">Color</label>
+                                <input name="color" type="text" class="form-control" placeholder="Ej: Marrón y blanco"
+                                       required>
+                            </div>
+
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label">Peso (kg)</label>
+                                <input name="weight" type="number" step="0.01" class="form-control"
+                                       placeholder="Ej: 12.5" required>
+                            </div>
+                        </div>
+                        <div class="row m-0">
+                            <div class="col-12 mt-3">
+                                <label class="form-label">Descripción</label>
+                                <textarea name="description" class="form-control" rows="3"
+                                          placeholder="Describe su personalidad y comportamiento general"
+                                          required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Salud -->
+                        <div class="section-divider">
+                            <div class="icon-wrapper">
+                                <i class="bi bi-heart-pulse"></i>
+                            </div>
+                            <h6 class="text-uppercase text-primary small">Estado de salud</h6>
+                        </div>
+                        <div class="row m-0">
+                            <div class="col-md-4">
+                                <label class="form-label">Condición actual</label>
+                                <select name="health_status" class="form-select">
+                                    {% for s in health_choices %}
+                                        <option value="{{ s.0 }}">{{ s.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row m-0">
+                            <div class="col-md-6 mt-3">
+                                <div class="form-check form-switch">
+                                    <input name="vaccinated" class="form-check-input" type="checkbox">
+                                    <label class="form-check-label">Vacunado</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <div class="form-check form-switch">
+                                    <input name="sterilized" class="form-check-input" type="checkbox">
+                                    <label class="form-check-label">Esterilizado</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <div class="form-check form-switch">
+                                    <input name="dewormed" class="form-check-input" type="checkbox">
+                                    <label class="form-check-label">Desparasitado</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <div class="form-check form-switch">
+                                    <input name="microchipped" class="form-check-input" type="checkbox">
+                                    <label class="form-check-label">Microchip</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Compatibilidad -->
+                        <div class="section-divider">
+                            <div class="icon-wrapper">
+                                <i class="bi bi-hand-thumbs-up"></i>
+                            </div>
+                            <h6 class="text-uppercase text-primary small">Compatibilidad</h6>
+                        </div>
+                        <div class="row m-0">
+                            <div class="col-md-6 mt-3">
+                                <div class="form-check form-switch">
+                                    <input name="good_with_kids" class="form-check-input" type="checkbox" checked>
+                                    <label class="form-check-label">Niños</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <div class="form-check form-switch">
+                                    <input name="good_with_dogs" class="form-check-input" type="checkbox" checked>
+                                    <label class="form-check-label">Perros</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <div class="form-check form-switch">
+                                    <input name="good_with_cats" class="form-check-input" type="checkbox" checked>
+                                    <label class="form-check-label">Gatos</label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Estado -->
+                        <div class="row m-0">
+                            <div class="col-md-4 mt-3">
+                                <label class="form-label">Estado</label>
+                                <select name="status" class="form-select">
+                                    {% for s in status_choices %}
+                                        <option value="{{ s.0 }}">{{ s.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal"><i
+                            class="bi bi-x-lg"></i> Cerrar
+                    </button>
+                    <button id="btn-save-pet" type="button" class="btn btn-primary"><i class="bi bi-save"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {#    <div id="loadingSpinner" class="text-center my-4" style="display: none;">#}
+    {#        <div class="spinner-border text-primary" role="status">#}
+    {#            <span class="visually-hidden">Cargando...</span>#}
+    {#        </div>#}
+    {#        <p class="mt-2 text-muted">Cargando...</p>#}
+    {#    </div>#}
+
+    <!-- Modal Confirmación Eliminar Mascota -->
+    <div class="modal fade" id="deletePetModal" tabindex="-1" aria-labelledby="deletePetModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deletePetModalLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>¿Estás seguro de que deseas eliminar esta mascota?</h6>
+                    <p>Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal"><i
+                            class="bi bi-x-lg"></i> Cancelar
+                    </button>
+                    <button type="button" id="confirmDeletePetBtn" class="btn btn-danger"><i class="bi bi-trash"></i>
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        let reloadPage = false;
+        // GUARDAR MASCOTA
+        document.getElementById("btn-save-pet").addEventListener("click", async e => {
+            const form = document.getElementById("petForm");
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                form.classList.add("was-validated");
+                return;
+            }
+            e.preventDefault();
+            const savePetButton = document.getElementById("btn-save-pet");
+            savePetButton.disabled = true;
+            savePetButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2 text-light" role="status" aria-hidden="true"></span> Guardando...';
+            const formData = new FormData(form);
+            formData.append('assign_user', 'true');
+            const res = await fetch(form.action, {
+                method: "POST",
+                body: formData,
+            });
+
+            const response = await res.json();
+            if (response.success) {
+                //window.location.href = "/user/dashboard/";
+                showToast(response.message, "success");
+                savePetButton.hidden = true;
+                reloadPage = true;
+            } else {
+                showToast(response.message, "error");
+            }
+        });
+
+        // EDITAR MASCOTA
+        document.querySelectorAll('.edit-pet-btn').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                const petId = this.dataset.id;
+
+                try {
+                    const res = await fetch(`/pets/${petId}/`);
+                    const data = await res.json(); // solo una vez
+
+                    if (data.success) {
+                        const pet = data.pet;
+
+                        // Mostrar modal
+                        const modal = new bootstrap.Modal(document.getElementById('petModal'));
+                        modal.show();
+
+                        const form = document.getElementById('petForm');
+                        form.action = `/pets/${pet.id}/update/`;
+                        document.getElementById('modalTitlePet').innerText = "Editar Mascota";
+
+                        // Funciones auxiliares para asignar valores
+                        const setValue = (selector, value) => {
+                            const el = form.querySelector(selector);
+                            if (el) el.value = value;
+                        };
+
+                        const setChecked = (selector, value) => {
+                            const el = form.querySelector(selector);
+                            if (el) el.checked = value;
+                        };
+
+                        // Asignar valores a inputs y selects
+                        setValue('#pet_id', pet.id);
+                        setValue('input[name="name"]', pet.name);
+                        setValue('select[name="species"]', pet.species);
+                        setValue('select[name="breed"]', pet.breed || "");
+                        setValue('input[name="age_years"]', pet.age_years);
+                        setValue('input[name="age_months"]', pet.age_months);
+                        setValue('select[name="sex"]', pet.sex);
+                        setValue('select[name="size"]', pet.size);
+                        setValue('input[name="color"]', pet.color);
+                        setValue('input[name="weight"]', pet.weight);
+                        setValue('textarea[name="description"]', pet.description);
+                        setValue('select[name="health_status"]', pet.health_status);
+                        setValue('select[name="status"]', pet.status);
+
+                        // Asignar valores a checkboxes
+                        setChecked('input[name="vaccinated"]', pet.vaccinated);
+                        setChecked('input[name="sterilized"]', pet.sterilized);
+                        setChecked('input[name="dewormed"]', pet.dewormed);
+                        setChecked('input[name="microchipped"]', pet.microchipped);
+                        setChecked('input[name="good_with_kids"]', pet.good_with_kids);
+                        setChecked('input[name="good_with_dogs"]', pet.good_with_dogs);
+                        setChecked('input[name="good_with_cats"]', pet.good_with_cats);
+
+                    } else {
+                        showToast(data.message, "error");
+                    }
+                } catch (error) {
+                    console.error("Error al cargar los datos de la mascota:", error);
+                    showToast("No se pudieron cargar los datos de la mascota.", "error");
+                }
+            });
+        });
+
+        // ELIMINAR MASCOTA
+        let petIdToDelete = null;
+
+        // Abrir modal al hacer click en el botón eliminar
+        document.querySelectorAll('.delete-pet-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                // Obtenemos directamente el id desde el atributo data-id del botón
+                petIdToDelete = this.dataset.id;
+
+                const deleteModalEl = document.getElementById('deletePetModal');
+                const deleteModal = new bootstrap.Modal(deleteModalEl);
+                deleteModal.show();
+            });
+        });
+
+        // Confirmar eliminación desde el modal
+        document.getElementById('confirmDeletePetBtn').addEventListener('click', async function () {
+            if (!petIdToDelete) return;
+
+            const deleteModalEl = document.getElementById('deletePetModal');
+            const deleteModal = bootstrap.Modal.getInstance(deleteModalEl);
+
+            try {
+                const res = await fetch(`/pets/${petIdToDelete}/delete/`, {
+                    method: "POST",
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast(data.message, "success");
+                    {#reloadPage = true;#}
+
+                    // Cerrar el modal de confirmación
+                    if (deleteModal) deleteModal.hide();
+
+                    // Opcional: eliminar la tarjeta de la mascota sin recargar la página
+                    const card = document.querySelector(`.delete-pet-btn[data-id="${petIdToDelete}"]`).closest('.card');
+                    if (card) card.remove();
+
+                } else {
+                    showToast(data.message, "error");
+                }
+            } catch (error) {
+                console.error("Error al eliminar la mascota:", error);
+                showToast("No se pudo eliminar la mascota.", "error");
+            } finally {
+                petIdToDelete = null;
+            }
+        });
+
+        // RESETEAR FORMULARIO AL CERRAR MODAL
+        const petModal = document.getElementById('petModal');
+        petModal.addEventListener('hidden.bs.modal', function (event) {
+            const form = document.getElementById("petForm");
+            form.reset();
+            form.querySelector('#pet_id').value = '';
+            form.action = "{% url 'pets:create' %}";
+            form.classList.remove("was-validated");
+            const savePetButton = document.getElementById("btn-save-pet");
+            savePetButton.disabled = false;
+            savePetButton.hidden = false;
+            savePetButton.innerHTML = '<i class="bi bi-save"></i> Guardar';
+            if (reloadPage) {
+                location.reload();
+            }
+        });
+
+        // Boton clear-search-btn
+        document.querySelectorAll('.clear-search-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                window.location.href = "{% url 'pets:my_pets' %}";
+            });
+        });
+
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+
+    </script>
+
+{% endblock %}

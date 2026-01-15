@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'user.apps.UserConfig',
     'adopcion.apps.AdopcionConfig',
-    'base'
+    'base',
+    'pets'
     # 'reconocimiento.apps.ReconocimientoConfig',
 
 ]
@@ -152,3 +153,7 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuración para archivos media
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
