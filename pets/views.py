@@ -68,7 +68,7 @@ def pet_list(request):
 def pet_detail(request, pk):
     try:
         pet = Pet.objects.get(pk=pk)
-        serializer = PetSerializer(pet)
+        serializer = PetSerializer(pet, context={'request': request})
         return Response({
             "success": True,
             "message": "Mascota encontrada",
@@ -127,7 +127,6 @@ def pet_create(request):
 def pet_update(request, pk):
     """Actualizar mascota existente vía AJAX"""
     pet = get_object_or_404(Pet, pk=pk)
-
     # Verificar permisos
     if pet.created_by != request.user and not request.user.is_staff:
         return JsonResponse({
@@ -142,8 +141,19 @@ def pet_update(request, pk):
 
             # Manejar nuevas imágenes
             images = request.FILES.getlist('images')
-            for image in images:
-                PetImage.objects.create(pet=pet, image=image)
+            if images:
+                # 1️⃣ Eliminar imágenes anteriores (BD + archivos)
+                for img in pet.images.all():
+                    img.image.delete(save=False)  # elimina archivo físico
+                    img.delete()  # elimina registro
+
+                # 2️⃣ Guardar nuevas imágenes
+                for idx, image in enumerate(images):
+                    PetImage.objects.create(
+                        pet=pet,
+                        image=image,
+                        is_primary=(idx == 0)
+                    )
 
             return JsonResponse({
                 'success': True,
@@ -203,9 +213,9 @@ def my_pets(request):
     user_data = request.session.get("user_data")
     # Obtener el query de búsqueda
     query = request.GET.get('q', '')
-
-    pets = Pet.objects.filter(user=request.user).select_related('species', 'breed').prefetch_related('images')
-
+    pets = Pet.objects.filter(user=request.user).select_related('species', 'breed')
+    # serializer = PetSerializer(pets, context={'request': request})
+    # print(serializer.data)
     # Filtrar por nombre si hay query
     if query:
         pets = pets.filter(name__icontains=query)
@@ -230,7 +240,7 @@ def my_pets(request):
         "health_choices": health_choices,
         "status_choices": status_choices,
     }
-
+    print('ss', context)
     return render(request, 'pets/my_pets.html', context)
 
 

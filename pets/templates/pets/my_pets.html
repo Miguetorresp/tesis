@@ -55,8 +55,11 @@
                     <div class="col-12 col-md-3 col-sm-6 col-xs-6 mt-3 pet-card">
                         <div class="card mb-4 h-100 shadow-sm zoom-card">
                             <div class="position-relative">
-                                {% if pet.photo %}
-                                    <img src="{{ pet.photo.url }}" class="card-img-top" alt="Foto de {{ pet.name }}">
+                                {% if pet.primary_image %}
+                                    {% if pet.primary_image %}
+                                        <img src="{{ pet.primary_image.image.url }}" class="card-img-top"
+                                             alt="Foto de {{ pet.name }}">
+                                    {% endif %}
                                 {% else %}
                                     <img src="{% static 'images/default_pet.png' %}" class="card-img-top"
                                          alt="Foto por defecto">
@@ -78,13 +81,13 @@
                                 </h5>
                                 <p class="card-text mb-2">{{ pet.breed|default:"Sin raza" }}</p>
                             </div>
-                            <div class="card-footer border-0 d-flex px-3">
-                                <button class="btn btn-primary btn-custom flex-grow-1 me-2 nowrap edit-pet-btn"
+                            <div class="card-footer border-0 d-flex px-3 justify-content-between">
+                                <button class="btn btn-primary btn-custom flex-grow-1 me-2 edit-pet-btn"
                                         data-id="{{ pet.id }}">
                                     <i class="bi bi-pencil me-1"></i> Editar
                                 </button>
                                 <button class="btn btn-outline-danger btn-custom delete-pet-btn" data-id="{{ pet.id }}"
-                                        title="Eliminar" style="width: 45px;">
+                                        title="Eliminar" style="flex-shrink:0; width:45px;">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
@@ -153,7 +156,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="petForm" method="post" action="{% url 'pets:create' %}" class="row needs-validation"
-                          novalidate>
+                          novalidate enctype="multipart/form-data">
                         {% csrf_token %}
                         <!-- Información básica -->
                         <input type="hidden" name="pet_id" id="pet_id">
@@ -328,6 +331,41 @@
                                 </select>
                             </div>
                         </div>
+                        <!-- Imagenes -->
+                        <div class="section-divider">
+                            <div class="icon-wrapper">
+                                <i class="bi bi-hand-thumbs-up"></i>
+                            </div>
+                            <h6 class="text-uppercase text-primary small">Imagenes</h6>
+                        </div>
+                        <div class="d-flex ps-5 pe-5">
+                            <div class="alert alert-info d-flex align-items-center p-3" role="alert">
+                                <i class="bi bi-info-circle-fill flex-shrink-0 me-2"></i>
+                                <div>
+                                    Para un mejor perfil, se recomienda subir al menos dos imágenes de tu mascota: una
+                                    del
+                                    rostro y otra de cuerpo completo.
+                                </div>
+                            </div>
+
+                        </div>
+                        <div id="loaded-images"></div>
+                        <!-- Zonas de carga -->
+                        <div class="row m-0">
+                            <div class="col-md-12 mb-12">
+                                <div class="drop-zone" id="dropZone">
+                                    <input type="file" id="imageInput" name="images" accept="image/*" multiple hidden>
+
+                                    <div id="dropText">
+                                        <div class="upload-icon">📷</div>
+                                        <p class="fw-bold">Arrastra imágenes aquí</p>
+                                        <p class="text-muted small">o haz clic para seleccionar</p>
+                                    </div>
+
+                                    <div id="previewContainer" class="d-flex flex-wrap gap-3 mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
                     </form>
 
                 </div>
@@ -419,7 +457,7 @@
 
                     if (data.success) {
                         const pet = data.pet;
-
+                        console.log('pet', pet);
                         // Mostrar modal
                         const modal = new bootstrap.Modal(document.getElementById('petModal'));
                         modal.show();
@@ -462,6 +500,76 @@
                         setChecked('input[name="good_with_kids"]', pet.good_with_kids);
                         setChecked('input[name="good_with_dogs"]', pet.good_with_dogs);
                         setChecked('input[name="good_with_cats"]', pet.good_with_cats);
+
+                        //Agregar imagenes cargadas
+                        if (pet.images.length > 0) {
+                            const loadedImages = document.getElementById("loaded-images");
+                            loadedImages.innerHTML = ''; // limpiar contenido previo
+
+                            // Wrapper centrado
+                            const wrapper = document.createElement('div');
+                            wrapper.style.display = 'flex';
+                            wrapper.style.justifyContent = 'center';
+                            wrapper.style.alignItems = 'center';
+                            wrapper.style.width = '100%';
+                            wrapper.style.margin = '20px 0';
+
+                            // Carousel compacto
+                            const carousel = document.createElement('div');
+                            carousel.id = "carouselExample";
+                            carousel.className = "carousel slide";
+                            carousel.setAttribute("data-bs-ride", "carousel");
+                            carousel.style.width = "auto";       // se adapta al contenido
+                            carousel.style.maxWidth = "100%";    // no exceda el contenedor
+
+                            // Contenedor de items
+                            const carouselInner = document.createElement('div');
+                            carouselInner.className = "carousel-inner";
+
+                            // Agregar imágenes al carousel
+                            pet.images.forEach((imgObj, index) => {
+                                const itemDiv = document.createElement('div');
+                                itemDiv.className = "carousel-item" + (index === 0 ? " active" : "");
+
+                                const img = document.createElement("img");
+                                img.src = imgObj.image;
+                                img.className = "d-block rounded border";
+                                img.style.width = "150px";       // ancho fijo
+                                img.style.height = "150px";      // alto fijo
+                                img.style.objectFit = "cover";   // recorta manteniendo proporción
+                                img.style.margin = "0 auto";     // centrado dentro del item
+
+                                itemDiv.appendChild(img);
+                                carouselInner.appendChild(itemDiv);
+                            });
+
+                            carousel.appendChild(carouselInner);
+
+                            // Controles
+                            const prevBtn = document.createElement('button');
+                            prevBtn.className = "carousel-control-prev";
+                            prevBtn.type = "button";
+                            prevBtn.setAttribute("data-bs-target", "#carouselExample");
+                            prevBtn.setAttribute("data-bs-slide", "prev");
+                            prevBtn.innerHTML = `<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                         <span class="visually-hidden">Previous</span>`;
+
+                            const nextBtn = document.createElement('button');
+                            nextBtn.className = "carousel-control-next";
+                            nextBtn.type = "button";
+                            nextBtn.setAttribute("data-bs-target", "#carouselExample");
+                            nextBtn.setAttribute("data-bs-slide", "next");
+                            nextBtn.innerHTML = `<span class="carousel-control-next-icon" aria-hidden="true"></span>
+                         <span class="visually-hidden">Next</span>`;
+
+                            carousel.appendChild(prevBtn);
+                            carousel.appendChild(nextBtn);
+
+                            // Agregar carousel al wrapper centrado
+                            wrapper.appendChild(carousel);
+                            loadedImages.appendChild(wrapper);
+                        }
+
 
                     } else {
                         showToast(data.message, "error");
@@ -542,6 +650,8 @@
             if (reloadPage) {
                 location.reload();
             }
+            const loadedImages = document.getElementById("loaded-images");
+            loadedImages.innerHTML = '';
         });
 
         // Boton clear-search-btn
@@ -554,6 +664,80 @@
         const loadingSpinner = document.getElementById('loadingSpinner');
 
 
+        const imageInput = document.getElementById("imageInput");
+        const dropZone = document.getElementById("dropZone");
+        const previewContainer = document.getElementById("previewContainer");
+
+        let selectedImages = [];
+
+        dropZone.addEventListener("click", () => imageInput.click());
+
+        dropZone.addEventListener("dragover", e => {
+            e.preventDefault();
+            dropZone.classList.add("dragover");
+        });
+
+        dropZone.addEventListener("dragleave", () => {
+            dropZone.classList.remove("dragover");
+        });
+
+        dropZone.addEventListener("drop", e => {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+            handleFiles(e.dataTransfer.files);
+        });
+
+        imageInput.addEventListener("change", e => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            [...files].forEach(file => {
+                if (!file.type.startsWith("image/")) return;
+
+                selectedImages.push(file);
+                renderPreview(file);
+            });
+
+            syncInputFiles();
+        }
+
+        function renderPreview(file) {
+            const reader = new FileReader();
+
+            reader.onload = e => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "position-relative";
+
+                wrapper.innerHTML = `
+            <img src="${e.target.result}"
+                 class="rounded border"
+                 style="width:120px; height:120px; object-fit:cover;">
+            <button type="button"
+                    class="btn btn-sm btn-danger position-absolute top-0 end-0"
+                    style="transform: translate(30%, -30%);">
+                ✕
+            </button>
+        `;
+
+                wrapper.querySelector("button").onclick = (e) => {
+                    e.stopPropagation(); // 🔥 ESTA LÍNEA
+                    selectedImages = selectedImages.filter(img => img !== file);
+                    wrapper.remove();
+                    syncInputFiles();
+                };
+
+                previewContainer.appendChild(wrapper);
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function syncInputFiles() {
+            const dataTransfer = new DataTransfer();
+            selectedImages.forEach(file => dataTransfer.items.add(file));
+            imageInput.files = dataTransfer.files;
+        }
     </script>
 
 {% endblock %}
