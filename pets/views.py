@@ -229,7 +229,8 @@ def my_pets(request):
     size_choices = Pet.SIZE_CHOICES
     health_choices = Pet.HEALTH_STATUS_CHOICES
     status_choices = Pet.STATUS_CHOICES
-
+    breeds = Breed.objects.all()
+    print(breeds)
     context = {
         'pets': page_obj,
         'query': query,
@@ -239,6 +240,7 @@ def my_pets(request):
         "size_choices": size_choices,
         "health_choices": health_choices,
         "status_choices": status_choices,
+        "breeds": breeds,
     }
     print('ss', context)
     return render(request, 'pets/my_pets.html', context)

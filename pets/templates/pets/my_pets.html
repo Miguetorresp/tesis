@@ -174,7 +174,8 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Especie</label>
-                                <select name="species" class="form-select" required>
+                                <select name="species" id="id_species" class="form-select" required
+                                >
                                     <option value="">Seleccionar</option>
                                     {% for s in species %}
                                         <option value="{{ s.id }}">{{ s.name }}</option>
@@ -183,8 +184,11 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Raza</label>
-                                <select class="form-select">
-                                    <option value="">Opcional</option>
+                                <select class="form-select" name="breed">
+                                    <option value="">Seleccionar</option>
+                                    {% for b in breeds %}
+                                        <option value="{{ b.id }}">{{ b.name }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                         </div>
@@ -481,7 +485,10 @@
                         setValue('#pet_id', pet.id);
                         setValue('input[name="name"]', pet.name);
                         setValue('select[name="species"]', pet.species);
-                        setValue('select[name="breed"]', pet.breed || "");
+                        loadBreedsBySpecies(pet.species, pet.breed);
+                        {#setValue('select[name="breed"]', pet.breed || "");#}
+
+
                         setValue('input[name="age_years"]', pet.age_years);
                         setValue('input[name="age_months"]', pet.age_months);
                         setValue('select[name="sex"]', pet.sex);
@@ -652,6 +659,63 @@
             }
             const loadedImages = document.getElementById("loaded-images");
             loadedImages.innerHTML = '';
+            const modal = document.getElementById('petModal');
+            const breedSelect = modal.querySelector('select[name="breed"]');
+            breedSelect.innerHTML = '<option value="">Seleccionar</option>';
+        });
+
+        //document.getElementById('id_species').addEventListener('change', function () {
+        //    const speciesId = this.value;
+        //    const breedSelect = document.querySelector('select[name="breed"]');
+        //
+        //    // Limpiar opciones previas
+        //    breedSelect.innerHTML = '<option value="">Seleccionar</option>';
+        //
+        //    if (speciesId) {
+        //        fetch(`/pets/api/breeds/${speciesId}`)
+        //            .then(response => response.json())
+        //            .then(data => {
+        //                data.forEach(breed => {
+        //                    const option = document.createElement('option');
+        //                    option.value = breed.id;
+        //                    option.textContent = breed.name;
+        //                    breedSelect.appendChild(option);
+        //                });
+        //            })
+        //            .catch(error => {
+        //                }
+        //            );
+        //    }
+        //});
+
+
+        function loadBreedsBySpecies(speciesId, breedId = null) {
+            const modal = document.getElementById('petModal');
+            const breedSelect = modal.querySelector('select[name="breed"]');
+
+            if (!breedSelect) return; // seguridad
+
+            breedSelect.innerHTML = '<option value="">Seleccionar</option>';
+
+            fetch(`/pets/api/breeds/${speciesId}/`) // o la URL que tengas para traer las razas
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(b => {
+                        const opt = document.createElement('option');
+                        opt.value = b.id;
+                        opt.text = b.name;
+                        if (breedId) {
+                            if (b.id === breedId) {
+                                opt.selected = true;
+                            }
+                        }
+                        breedSelect.appendChild(opt);
+                    });
+                });
+        }
+
+        document.getElementById('id_species').addEventListener('change', function () {
+            loadBreedsBySpecies(this.value);
         });
 
         // Boton clear-search-btn
