@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from .models import Pet, PetImage, Species, Breed
 from .forms import PetForm, PetSearchForm, PetImageForm
@@ -11,6 +11,8 @@ from rest_framework.decorators import api_view
 from .serializers import PetSerializer
 from rest_framework.response import Response
 from rest_framework import status
+from django.utils import timezone
+from django.core.exceptions import FieldDoesNotExist
 
 
 def pet_list(request):
@@ -250,3 +252,81 @@ def get_breeds_by_species(request, species_id):
     """API para obtener razas por especie (para carga dinámica)"""
     breeds = Breed.objects.filter(species_id=species_id).values('id', 'name')
     return JsonResponse(list(breeds), safe=False)
+
+
+def create_lost_pet(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        species = request.POST.get('species')  # ajustar según tu modelo
+        # otros campos que quieras capturar
+        reported_location = request.POST.get('reported_location')
+        reporter_name = request.POST.get('reporter_name')
+
+        pet = Pet.objects.create(
+            name=name,
+            species_id=species if species else None,
+            is_lost_report=True,
+            reported_at=timezone.now(),
+            reported_location=reported_location,
+            reporter_name=reporter_name,
+            # asigna otros campos por defecto según tu modelo
+        )
+
+        images = request.FILES.getlist('images')
+        for img in images:
+            PetImage.objects.create(pet=pet, image=img)
+
+        messages.success(request, "Mascota perdida reportada correctamente.")
+        return redirect('pets:lost_list')  # crear vista lista de perdidos
+
+    # GET -> mostrar formulario (puedes reutilizar selects desde contexto)
+    species_list = []  # cargar species desde tu modelo
+    return render(request, 'pets/lost_create.html', {'species': species_list})
+
+
+def lost_list(request):
+    """
+    Lista las mascotas reportadas como perdidas.
+    Intenta detectar campos comunes en el modelo `Pet` para filtrar:
+    - booleanos: is_lost, reported_lost, created_from_lost_form
+    - status: 'lost' / 'perdida' / 'perdido'
+    Si no existe campo, devuelve queryset vacío.
+    """
+    pet_model = Pet
+    qs = None
+    # campos que podrías tener; ajusta si usas otro nombre
+    boolean_fields = ['is_lost', 'reported_lost', 'created_from_lost_form']
+    for fname in boolean_fields:
+        try:
+            pet_model._meta.get_field(fname)
+        except FieldDoesNotExist:
+            continue
+        qs = Pet.objects.filter(**{fname: True})
+        break
+
+    if qs is None:
+        # intentar campo "status"
+        try:
+            pet_model._meta.get_field('status')
+            qs = Pet.objects.filter(status__in=['lost', 'perdida', 'perdido'])
+        except FieldDoesNotExist:
+            qs = Pet.objects.none()
+
+    # ordenar: preferir created_at si existe, si no usar id descendente
+    try:
+        pet_model._meta.get_field('created_at')
+        qs = qs.order_by('-created_at')
+    except FieldDoesNotExist:
+        qs = qs.order_by('-id')
+
+    # paginación simple
+    page = request.GET.get('page', 1)
+    paginator = Paginator(qs, 12)
+    try:
+        pets_page = paginator.page(page)
+    except PageNotAnInteger:
+        pets_page = paginator.page(1)
+    except EmptyPage:
+        pets_page = paginator.page(paginator.num_pages)
+
+    return render(request, 'pets/lost_list.html', {'pets': pets_page})

@@ -29,7 +29,7 @@
     <nav class="sidebar-nav">
         <div class="nav-section">
             <p class="nav-section-title">DASHBOARDS</p>
-            
+
             <a href="{% url 'dashboard' %}" class="nav-link active">
                 <i class="bi bi-house-door"></i>
                 <span class="nav-text">Dashboards</span>
@@ -39,14 +39,14 @@
                 <i class="bi bi-heart"></i>
                 <span class="nav-text">Mis mascotas</span>
             </a>
-            
+
             <a href="{% url 'pets:list' %}" class="nav-link">
-                <i class="bi bi-bar-chart"></i>
+                <i class="bi bi-megaphone"></i>
                 <span class="nav-text">Adopción</span>
             </a>
-            
-            <a href="#" class="nav-link">
-                <i class="bi bi-cart"></i>
+
+            <a href="{% url 'pets:lost_list' %}" class="nav-link">
+                <i class="bi bi-search-heart"></i>
                 <span class="nav-text">Perdidos</span>
             </a>
 
@@ -66,34 +66,34 @@
         </div>
 
         {% if user.role_id == 1 %}
-        <div class="nav-section mt-4">
-            <p class="nav-section-title">ADMINISTRACIÓN</p>
-            
-            <a href="/admin/users/" class="nav-link">
-                <i class="bi bi-person-gear"></i>
-                <span class="nav-text">Gestión Usuarios</span>
-            </a>
-            
-            <a href="/admin/roles/" class="nav-link">
-                <i class="bi bi-shield-check"></i>
-                <span class="nav-text">Roles</span>
-            </a>
-        </div>
+            <div class="nav-section mt-4">
+                <p class="nav-section-title">ADMINISTRACIÓN</p>
+
+                <a href="/admin/users/" class="nav-link">
+                    <i class="bi bi-person-gear"></i>
+                    <span class="nav-text">Gestión Usuarios</span>
+                </a>
+
+                <a href="/admin/roles/" class="nav-link">
+                    <i class="bi bi-shield-check"></i>
+                    <span class="nav-text">Roles</span>
+                </a>
+            </div>
         {% endif %}
 
         <div class="nav-section mt-4">
             <p class="nav-section-title">CONFIGURACIÓN</p>
-            
+
             <a href="/profile/" class="nav-link">
                 <i class="bi bi-person-circle"></i>
                 <span class="nav-text">Perfil</span>
             </a>
-            
+
             <a href="/settings/" class="nav-link">
                 <i class="bi bi-gear"></i>
                 <span class="nav-text">Configuración</span>
             </a>
-            
+
             <a href="/logout/" class="nav-link text-danger">
                 <i class="bi bi-box-arrow-right"></i>
                 <span class="nav-text">Salir</span>

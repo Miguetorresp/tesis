@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -134,6 +135,11 @@ class Pet(models.Model):
         verbose_name='Creado por'
     )
 
+    is_lost_report = models.BooleanField(default=False, db_index=True)
+    reported_at = models.DateTimeField(null=True, blank=True)
+    reported_location = models.CharField(max_length=255, null=True, blank=True)
+    reporter_name = models.CharField(max_length=100, null=True, blank=True)
+
     # Featured
     # is_featured = models.BooleanField(default=False, verbose_name='Destacado')
     # views_count = models.IntegerField(default=0, verbose_name='Número de vistas')
@@ -192,3 +198,17 @@ class PetImage(models.Model):
         if self.is_primary:
             PetImage.objects.filter(pet=self.pet, is_primary=True).update(is_primary=False)
         super().save(*args, **kwargs)
+
+
+class PetFaceDescriptor(models.Model):
+    pet = models.ForeignKey('Pet', related_name='face_descriptors', on_delete=models.CASCADE)
+    pet_image = models.ForeignKey('PetImage', related_name='face_descriptors', on_delete=models.CASCADE)
+    algorithm = models.CharField(max_length=50)  # ej: "face_recognition+opencv"
+    descriptor = models.JSONField()  # lista de floats (embeddings) - requiere Django >=3.1 o Postgres JSONField
+    confidence = models.FloatField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['pet']),
+        ]

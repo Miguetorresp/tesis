@@ -1,0 +1,81 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %} Mascotas perdidas {% endblock %}
+
+{% block content %}
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-minimal">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="bi bi-house-door"></i> Inicio</a></li>
+            <li class="breadcrumb-item active"><a href="#">Mascotas perdidas</a></li>
+        </ol>
+    </nav>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-0">Mascotas perdidas</h2>
+            <p class="fw-lighter mb-0">Gestiona las mascotas perdidas </p>
+        </div>
+        <a class="btn btn-primary" href="{% url 'pets:lost_create' %}"><i class="bi bi-plus-lg"></i> Reportar mascota
+            perdida</a>
+    </div>
+    <div class="text-primary">
+        <hr>
+    </div>
+
+    <div class="pet-grid">
+        {% for pet in pets %}
+            <article class="pet-card">
+                {% if pet.images.all|length > 0 %}
+                    <img class="pet-image" src="{{ pet.images.all.0.image.url }}" alt="{{ pet.name }}">
+                {% elif pet.photo %}
+                    <img class="pet-image" src="{{ pet.photo.url }}" alt="{{ pet.name }}">
+                {% else %}
+                    <div class="pet-image" style="display:flex;align-items:center;justify-content:center;color:#999;">
+                        Sin imagen
+                    </div>
+                {% endif %}
+
+                <div class="pet-body">
+                    <div class="pet-title">{{ pet.name|default:"Sin nombre" }}</div>
+                    <div class="pet-meta">
+                        {% if pet.species %}{{ pet.species.name }}{% endif %}
+                        {% if pet.breed %} — {{ pet.breed.name }}{% endif %}
+                        {% if pet.sex %} • {{ pet.get_sex_display }}{% endif %}
+                    </div>
+
+                    {% if pet.reported_location %}
+                        <div class="pet-meta">Lugar reportado: {{ pet.reported_location }}</div>
+                    {% endif %}
+                    {% if pet.reported_at %}
+                        <div class="pet-meta">Reportado: {{ pet.reported_at|date:"d/m/Y H:i" }}</div>
+                    {% endif %}
+                    {% if pet.reporter_name %}
+                        <div class="pet-meta">Reportado por: {{ pet.reporter_name }}</div>
+                    {% endif %}
+
+                    <div class="pet-actions">
+                        <a class="btn btn-secondary" href="{% url 'pets:detail' pet.pk %}">Ver</a>
+                        {% if request.user.is_authenticated and pet.created_by == request.user %}
+                            <a class="btn btn-primary" href="{% url 'pets:edit' pet.pk %}">Editar</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+        {% empty %}
+            <div class="col-12 mt-lg-5 text-muted text-center">
+                <i class="bi bi-folder-x fs-1"></i>
+                <p>No hay mascotas reportadas como perdidas.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="pagination" aria-label="Paginación">
+        {% if pets.has_previous %}
+            <a class="btn btn-secondary" href="?page={{ pets.previous_page_number }}">« Anterior</a>
+        {% endif %}
+        <span>Página {{ pets.number }} de {{ pets.paginator.num_pages }}</span>
+        {% if pets.has_next %}
+            <a class="btn btn-secondary" href="?page={{ pets.next_page_number }}">Siguiente »</a>
+        {% endif %}
+    </div>
+
+{% endblock %}

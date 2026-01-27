@@ -1,0 +1,35 @@
+{% extends 'base/base.html' %}
+{% block title %} Reportar mascota perdida {% endblock %}
+
+{% block content %}
+    <h2>Reportar mascota perdida</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div>
+            <label>Nombre</label>
+            <input name="name" class="form-control" required>
+        </div>
+        <div>
+            <label>Especie</label>
+            <select name="species" class="form-select">
+                <option value="">Seleccionar</option>
+                {% for s in species %}
+                    <option value="{{ s.id }}">{{ s.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label>Ubicación</label>
+            <input name="reported_location" class="form-control">
+        </div>
+        <div>
+            <label>Reportado por</label>
+            <input name="reporter_name" class="form-control">
+        </div>
+        <div>
+            <label>Imágenes</label>
+            <input type="file" name="images" accept="image/*" multiple>
+        </div>
+        <button class="btn btn-primary mt-3">Reportar</button>
+    </form>
+{% endblock %}

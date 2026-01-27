@@ -6,7 +6,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb breadcrumb-minimal">
             <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="bi bi-house-door"></i> Inicio</a></li>
-            <li class="breadcrumb-item"><a href="#">Mis mascotas</a></li>
+            <li class="breadcrumb-item active"><a href="#">Mis mascotas</a></li>
         </ol>
     </nav>
 
@@ -663,31 +663,6 @@
             const breedSelect = modal.querySelector('select[name="breed"]');
             breedSelect.innerHTML = '<option value="">Seleccionar</option>';
         });
-
-        //document.getElementById('id_species').addEventListener('change', function () {
-        //    const speciesId = this.value;
-        //    const breedSelect = document.querySelector('select[name="breed"]');
-        //
-        //    // Limpiar opciones previas
-        //    breedSelect.innerHTML = '<option value="">Seleccionar</option>';
-        //
-        //    if (speciesId) {
-        //        fetch(`/pets/api/breeds/${speciesId}`)
-        //            .then(response => response.json())
-        //            .then(data => {
-        //                data.forEach(breed => {
-        //                    const option = document.createElement('option');
-        //                    option.value = breed.id;
-        //                    option.textContent = breed.name;
-        //                    breedSelect.appendChild(option);
-        //                });
-        //            })
-        //            .catch(error => {
-        //                }
-        //            );
-        //    }
-        //});
-
 
         function loadBreedsBySpecies(speciesId, breedId = null) {
             const modal = document.getElementById('petModal');

@@ -11,4 +11,6 @@ urlpatterns = [
     path('<int:pk>/delete/', views.pet_delete, name='delete'),
     path('my-pets/', views.my_pets, name='my_pets'),
     path('api/breeds/<int:species_id>/', views.get_breeds_by_species, name='get_breeds'),
+    path('lost/create/', views.create_lost_pet, name='lost_create'),
+    path('lost/', views.lost_list, name='lost_list')  # crear vista de listado
 ]

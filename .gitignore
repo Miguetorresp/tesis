@@ -1,6 +1,7 @@
 # Entornos virtuales
 venv/
 .env
+venv_django
 
 # Archivos de Django
 *.pyc
