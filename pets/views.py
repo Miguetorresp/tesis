@@ -232,7 +232,6 @@ def my_pets(request):
     health_choices = Pet.HEALTH_STATUS_CHOICES
     status_choices = Pet.STATUS_CHOICES
     breeds = Breed.objects.all()
-    print(breeds)
     context = {
         'pets': page_obj,
         'query': query,
@@ -255,33 +254,47 @@ def get_breeds_by_species(request, species_id):
 
 
 def create_lost_pet(request):
+    """Crear una nueva mascota vía AJAX/Fetch"""
     if request.method == 'POST':
-        name = request.POST.get('name')
-        species = request.POST.get('species')  # ajustar según tu modelo
-        # otros campos que quieras capturar
-        reported_location = request.POST.get('reported_location')
-        reporter_name = request.POST.get('reporter_name')
+        # Si envías FormData con 'name' y demás campos
+        form = PetForm(request.POST, request.FILES)
 
-        pet = Pet.objects.create(
-            name=name,
-            species_id=species if species else None,
-            is_lost_report=True,
-            reported_at=timezone.now(),
-            reported_location=reported_location,
-            reporter_name=reporter_name,
-            # asigna otros campos por defecto según tu modelo
-        )
+        if form.is_valid():
+            pet = form.save(commit=False)
+            assign_user = request.POST.get('assign_user', 'false').lower() == 'true'
+            is_lost_report = request.POST.get('is_lost_report', 'false').lower() == 'true'
+            pet.is_lost_report = is_lost_report
+            if assign_user:
+                pet.user = request.user
 
-        images = request.FILES.getlist('images')
-        for img in images:
-            PetImage.objects.create(pet=pet, image=img)
+            pet.created_by = request.user
+            pet.save()
 
-        messages.success(request, "Mascota perdida reportada correctamente.")
-        return redirect('pets:lost_list')  # crear vista lista de perdidos
+            # Guardar imágenes si las hay
+            images = request.FILES.getlist('images')
+            for idx, image in enumerate(images):
+                PetImage.objects.create(
+                    pet=pet,
+                    image=image,
+                    is_primary=(idx == 0)
+                )
 
-    # GET -> mostrar formulario (puedes reutilizar selects desde contexto)
-    species_list = []  # cargar species desde tu modelo
-    return render(request, 'pets/lost_create.html', {'species': species_list})
+            # Retorna JSON para el fetch
+            return JsonResponse({
+                'success': True,
+                # 'message': f'Mascota "{pet.name}" creada con éxito.',
+                'message': f'Mascota creada con éxito.',
+                'pet_id': pet.pk
+            })
+
+        else:
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors
+            }, status=400)
+
+    # Si no es POST
+    return JsonResponse({'success': False, 'message': 'Método no permitido'}, status=405)
 
 
 def lost_list(request):
@@ -292,6 +305,13 @@ def lost_list(request):
     - status: 'lost' / 'perdida' / 'perdido'
     Si no existe campo, devuelve queryset vacío.
     """
+    species = Species.objects.all()
+    sex_choices = Pet.SEX_CHOICES
+    size_choices = Pet.SIZE_CHOICES
+    breeds = Breed.objects.all()
+    health_choices = Pet.HEALTH_STATUS_CHOICES
+    status_choices = Pet.STATUS_CHOICES
+
     pet_model = Pet
     qs = None
     # campos que podrías tener; ajusta si usas otro nombre
@@ -329,4 +349,14 @@ def lost_list(request):
     except EmptyPage:
         pets_page = paginator.page(paginator.num_pages)
 
-    return render(request, 'pets/lost_list.html', {'pets': pets_page})
+    context = {
+        'pets': pets_page,
+        "species": species,
+        "sex_choices": sex_choices,
+        "size_choices": size_choices,
+        "breeds": breeds,
+        "health_choices": health_choices,
+        "status_choices": status_choices,
+    }
+
+    return render(request, 'pets/lost_list.html', context)

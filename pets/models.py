@@ -72,17 +72,21 @@ class Pet(models.Model):
                               verbose_name='Raza')
 
     # Información básica
-    name = models.CharField(max_length=100, verbose_name='Nombre')
+    name = models.CharField(max_length=100, verbose_name='Nombre', null=True, blank=True)
     age_years = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(30)],
         verbose_name='Edad (años)',
-        help_text='Edad aproximada en años'
+        help_text='Edad aproximada en años',
+        null=True,
+        blank=True
     )
     age_months = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(11)],
         default=0,
         verbose_name='Meses adicionales',
-        help_text='Meses adicionales (0-11)'
+        help_text='Meses adicionales (0-11)',
+        null=True,
+        blank=True
     )
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, verbose_name='Sexo')
     size = models.CharField(max_length=10, choices=SIZE_CHOICES, verbose_name='Tamaño')
@@ -139,6 +143,7 @@ class Pet(models.Model):
     reported_at = models.DateTimeField(null=True, blank=True)
     reported_location = models.CharField(max_length=255, null=True, blank=True)
     reporter_name = models.CharField(max_length=100, null=True, blank=True)
+    ubication_details = models.TextField(null=True, blank=True)
 
     # Featured
     # is_featured = models.BooleanField(default=False, verbose_name='Destacado')
@@ -201,14 +206,30 @@ class PetImage(models.Model):
 
 
 class PetFaceDescriptor(models.Model):
+    ALGORITHM_CHOICES = [
+        ('arcface', 'ArcFace Embedding'),
+        ('resnet50', 'ResNet50 Embedding'),
+        ('sift', 'SIFT Descriptors'),
+        ('orb', 'ORB Descriptors'),
+        ('yolo_face', 'YOLO Pet Face Detection'),
+    ]
     pet = models.ForeignKey('Pet', related_name='face_descriptors', on_delete=models.CASCADE)
     pet_image = models.ForeignKey('PetImage', related_name='face_descriptors', on_delete=models.CASCADE)
-    algorithm = models.CharField(max_length=50)  # ej: "face_recognition+opencv"
-    descriptor = models.JSONField()  # lista de floats (embeddings) - requiere Django >=3.1 o Postgres JSONField
+    algorithm = models.CharField(max_length=50, choices=ALGORITHM_CHOICES)  # ej: "face_recognition+opencv"
+    # descriptor = models.JSONField()  # lista de floats (embeddings) - requiere Django >=3.1 o Postgres JSONField
+
+    # Para descriptores clásicos (SIFT/ORB) que pueden ser muchos keypoints
+    # Los guardamos como JSON si son múltiples vectores
+    descriptor_json = models.JSONField(null=True, blank=True)
+
     confidence = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         indexes = [
-            models.Index(fields=['pet']),
+            models.Index(fields=['pet', 'algorithm']),
+            models.Index(fields=['algorithm', 'created_at']),
         ]
+
+    def __str__(self):
+        return f"{self.algorithm} - Pet {self.pet_id} - Image {self.pet_image_id}"

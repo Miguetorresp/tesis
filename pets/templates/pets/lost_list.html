@@ -14,7 +14,10 @@
             <h2 class="mb-0">Mascotas perdidas</h2>
             <p class="fw-lighter mb-0">Gestiona las mascotas perdidas </p>
         </div>
-        <a class="btn btn-primary" href="{% url 'pets:lost_create' %}"><i class="bi bi-plus-lg"></i> Reportar mascota
+        {#        <a class="btn btn-primary" href="{% url 'pets:lost_create' %}"><i class="bi bi-plus-lg"></i> Reportar mascota#}
+        {#            perdida</a>#}
+        <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#petModal"><i class="bi bi-plus-lg"></i>
+            Reportar mascota
             perdida</a>
     </div>
     <div class="text-primary">
@@ -77,5 +80,571 @@
             <a class="btn btn-secondary" href="?page={{ pets.next_page_number }}">Siguiente »</a>
         {% endif %}
     </div>
+
+    <div class="modal fade" id="petModal" tabindex="-1" aria-labelledby="modalTitlePet" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h1 class="modal-title fs-5" id="modalTitlePet">Reportar Mascota</h1>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="petForm" method="post" action="{% url 'pets:lost_create' %}" class="row needs-validation"
+                          novalidate enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <!-- Información básica -->
+                        <input type="hidden" name="pet_id" id="pet_id">
+
+                        <div class="section-divider mt-4">
+                            <div class="icon-wrapper">
+                                <i class="bi bi-info-circle"></i>
+                            </div>
+                            <h6 class="text-uppercase text-primary small">Información básica</h6>
+                        </div>
+                        <div class="row m-0">
+                            <div class="col-md-6 mt-0">
+                                <label class="form-label">Nombre</label>
+                                <input name="name" type="text" class="form-control" placeholder="Ej: Luna">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Especie</label>
+                                <select name="species" id="id_species" class="form-select" required
+                                >
+                                    <option value="">Seleccionar</option>
+                                    {% for s in species %}
+                                        <option value="{{ s.id }}">{{ s.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Raza</label>
+                                <select class="form-select" name="breed">
+                                    <option value="">Seleccionar</option>
+                                    {% for b in breeds %}
+                                        <option value="{{ b.id }}">{{ b.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Edad y características físicas -->
+                        <div class="section-divider">
+                            <div class="icon-wrapper">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                            <h6 class="text-uppercase text-primary small">Edad y características físicas</h6>
+                        </div>
+                        <div class="row m-0">
+                            <div class="col-md-4">
+                                <label class="form-label">Sexo</label>
+                                <select name="sex" class="form-select" required>
+                                    <option value="">Seleccionar</option>
+                                    {% for s in sex_choices %}
+                                        <option value="{{ s.0 }}">{{ s.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Tamaño</label>
+                                <select name="size" class="form-select" required>
+                                    <option value="">Seleccionar</option>
+                                    {% for s in size_choices %}
+                                        <option value="{{ s.0 }}">{{ s.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Color</label>
+                                <input name="color" type="text" class="form-control" placeholder="Ej: Marrón y blanco"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="row m-0">
+                            <div class="col-12 mt-3">
+                                <label class="form-label">Descripción</label>
+                                <textarea name="description" class="form-control" rows="3"
+                                          placeholder="Describe su personalidad y comportamiento general"
+                                          required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Ubicacion -->
+                        <div class="section-divider">
+                            <div class="icon-wrapper">
+                                <i class="bi bi-geo-alt"></i>
+                            </div>
+                            <h6 class="text-uppercase text-primary small">Ubicación</h6>
+                        </div>
+
+                        <div class="row m-0">
+                            <div class="col-12 mt-3">
+                                <label class="form-label">Detalles de Ubicación</label>
+                                <textarea name="ubication_detail" class="form-control" rows="3"
+                                          placeholder="Describe la ubicación donde se perdió la mascota"
+                                          required></textarea>
+                            </div>
+                        </div>
+
+
+                        <!-- Salud -->
+                        <div class="section-divider">
+                            <div class="icon-wrapper">
+                                <i class="bi bi-heart-pulse"></i>
+                            </div>
+                            <h6 class="text-uppercase text-primary small">Estados</h6>
+                        </div>
+                        <div class="row m-0">
+                            <div class="col-md-4">
+                                <label class="form-label">Condición actual</label>
+                                <select name="health_status" class="form-select" required>
+                                    {% for s in health_choices %}
+                                        <option value="{{ s.0 }}">{{ s.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Estado</label>
+                                <select name="status" class="form-select">
+                                    {% for s in status_choices %}
+                                        <option value="{{ s.0 }}">{{ s.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Imagenes -->
+                        <div class="section-divider">
+                            <div class="icon-wrapper">
+                                <i class="bi bi-hand-thumbs-up"></i>
+                            </div>
+                            <h6 class="text-uppercase text-primary small">Imagenes</h6>
+                        </div>
+                        <div class="d-flex ps-5 pe-5">
+                            <div class="alert alert-info d-flex align-items-center p-3" role="alert">
+                                <i class="bi bi-info-circle-fill flex-shrink-0 me-2"></i>
+                                <div>
+                                    Se recomienda subir al menos dos imágenes de la mascota: una
+                                    del
+                                    rostro y otra de cuerpo completo.
+                                </div>
+                            </div>
+
+                        </div>
+                        <div id="loaded-images"></div>
+                        <!-- Zonas de carga -->
+                        <div class="row m-0">
+                            <div class="col-md-12 mb-12">
+                                <div class="drop-zone" id="dropZone">
+                                    <input type="file" id="imageInput" name="images" accept="image/*" multiple hidden>
+
+                                    <div id="dropText">
+                                        <div class="upload-icon">📷</div>
+                                        <p class="fw-bold">Arrastra imágenes aquí</p>
+                                        <p class="text-muted small">o haz clic para seleccionar</p>
+                                    </div>
+
+                                    <div id="previewContainer" class="d-flex flex-wrap gap-3 mt-3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal"><i
+                            class="bi bi-x-lg"></i> Cerrar
+                    </button>
+                    <button id="btn-save-pet" type="button" class="btn btn-primary"><i class="bi bi-save"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirmación Eliminar Mascota -->
+    <div class="modal fade" id="deletePetModal" tabindex="-1" aria-labelledby="deletePetModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deletePetModalLabel">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>¿Estás seguro de que deseas eliminar esta mascota?</h6>
+                    <p>Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal"><i
+                            class="bi bi-x-lg"></i> Cancelar
+                    </button>
+                    <button type="button" id="confirmDeletePetBtn" class="btn btn-danger"><i class="bi bi-trash"></i>
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        let reloadPage = false;
+        // GUARDAR MASCOTA PERDIDA
+        document.getElementById("btn-save-pet").addEventListener("click", async e => {
+            const form = document.getElementById("petForm");
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+                form.classList.add("was-validated");
+                return;
+            }
+            e.preventDefault();
+            const savePetButton = document.getElementById("btn-save-pet");
+            savePetButton.disabled = true;
+            savePetButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2 text-light" role="status" aria-hidden="true"></span> Guardando...';
+            const formData = new FormData(form);
+            formData.append('assign_user', 'true');
+            formData.append('is_lost_report', 'true');
+            const res = await fetch(form.action, {
+                method: "POST",
+                body: formData,
+            });
+
+            const response = await res.json();
+            if (response.success) {
+                //window.location.href = "/user/dashboard/";
+                showToast(response.message, "success");
+                savePetButton.hidden = true;
+                reloadPage = true;
+            } else {
+                showToast(response.message, "error");
+            }
+        });
+
+        // EDITAR MASCOTA
+        document.querySelectorAll('.edit-pet-btn').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                const petId = this.dataset.id;
+
+                try {
+                    const res = await fetch(`/pets/${petId}/`);
+                    const data = await res.json(); // solo una vez
+
+                    if (data.success) {
+                        const pet = data.pet;
+                        console.log('pet', pet);
+                        // Mostrar modal
+                        const modal = new bootstrap.Modal(document.getElementById('petModal'));
+                        modal.show();
+
+                        const form = document.getElementById('petForm');
+                        form.action = `/pets/${pet.id}/update/`;
+                        document.getElementById('modalTitlePet').innerText = "Editar Mascota";
+
+                        // Funciones auxiliares para asignar valores
+                        const setValue = (selector, value) => {
+                            const el = form.querySelector(selector);
+                            if (el) el.value = value;
+                        };
+
+                        const setChecked = (selector, value) => {
+                            const el = form.querySelector(selector);
+                            if (el) el.checked = value;
+                        };
+
+                        // Asignar valores a inputs y selects
+                        setValue('#pet_id', pet.id);
+                        setValue('input[name="name"]', pet.name);
+                        setValue('select[name="species"]', pet.species);
+                        loadBreedsBySpecies(pet.species, pet.breed);
+                        {#setValue('select[name="breed"]', pet.breed || "");#}
+
+
+                        setValue('input[name="age_years"]', pet.age_years);
+                        setValue('input[name="age_months"]', pet.age_months);
+                        setValue('select[name="sex"]', pet.sex);
+                        setValue('select[name="size"]', pet.size);
+                        setValue('input[name="color"]', pet.color);
+                        setValue('input[name="weight"]', pet.weight);
+                        setValue('textarea[name="description"]', pet.description);
+                        setValue('select[name="health_status"]', pet.health_status);
+                        setValue('select[name="status"]', pet.status);
+
+                        // Asignar valores a checkboxes
+                        setChecked('input[name="vaccinated"]', pet.vaccinated);
+                        setChecked('input[name="sterilized"]', pet.sterilized);
+                        setChecked('input[name="dewormed"]', pet.dewormed);
+                        setChecked('input[name="microchipped"]', pet.microchipped);
+                        setChecked('input[name="good_with_kids"]', pet.good_with_kids);
+                        setChecked('input[name="good_with_dogs"]', pet.good_with_dogs);
+                        setChecked('input[name="good_with_cats"]', pet.good_with_cats);
+
+                        //Agregar imagenes cargadas
+                        if (pet.images.length > 0) {
+                            const loadedImages = document.getElementById("loaded-images");
+                            loadedImages.innerHTML = ''; // limpiar contenido previo
+
+                            // Wrapper centrado
+                            const wrapper = document.createElement('div');
+                            wrapper.style.display = 'flex';
+                            wrapper.style.justifyContent = 'center';
+                            wrapper.style.alignItems = 'center';
+                            wrapper.style.width = '100%';
+                            wrapper.style.margin = '20px 0';
+
+                            // Carousel compacto
+                            const carousel = document.createElement('div');
+                            carousel.id = "carouselExample";
+                            carousel.className = "carousel slide";
+                            carousel.setAttribute("data-bs-ride", "carousel");
+                            carousel.style.width = "auto";       // se adapta al contenido
+                            carousel.style.maxWidth = "100%";    // no exceda el contenedor
+
+                            // Contenedor de items
+                            const carouselInner = document.createElement('div');
+                            carouselInner.className = "carousel-inner";
+
+                            // Agregar imágenes al carousel
+                            pet.images.forEach((imgObj, index) => {
+                                const itemDiv = document.createElement('div');
+                                itemDiv.className = "carousel-item" + (index === 0 ? " active" : "");
+
+                                const img = document.createElement("img");
+                                img.src = imgObj.image;
+                                img.className = "d-block rounded border";
+                                img.style.width = "150px";       // ancho fijo
+                                img.style.height = "150px";      // alto fijo
+                                img.style.objectFit = "cover";   // recorta manteniendo proporción
+                                img.style.margin = "0 auto";     // centrado dentro del item
+
+                                itemDiv.appendChild(img);
+                                carouselInner.appendChild(itemDiv);
+                            });
+
+                            carousel.appendChild(carouselInner);
+
+                            // Controles
+                            const prevBtn = document.createElement('button');
+                            prevBtn.className = "carousel-control-prev";
+                            prevBtn.type = "button";
+                            prevBtn.setAttribute("data-bs-target", "#carouselExample");
+                            prevBtn.setAttribute("data-bs-slide", "prev");
+                            prevBtn.innerHTML = `<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                         <span class="visually-hidden">Previous</span>`;
+
+                            const nextBtn = document.createElement('button');
+                            nextBtn.className = "carousel-control-next";
+                            nextBtn.type = "button";
+                            nextBtn.setAttribute("data-bs-target", "#carouselExample");
+                            nextBtn.setAttribute("data-bs-slide", "next");
+                            nextBtn.innerHTML = `<span class="carousel-control-next-icon" aria-hidden="true"></span>
+                         <span class="visually-hidden">Next</span>`;
+
+                            carousel.appendChild(prevBtn);
+                            carousel.appendChild(nextBtn);
+
+                            // Agregar carousel al wrapper centrado
+                            wrapper.appendChild(carousel);
+                            loadedImages.appendChild(wrapper);
+                        }
+
+
+                    } else {
+                        showToast(data.message, "error");
+                    }
+                } catch (error) {
+                    console.error("Error al cargar los datos de la mascota:", error);
+                    showToast("No se pudieron cargar los datos de la mascota.", "error");
+                }
+            });
+        });
+
+        // ELIMINAR MASCOTA
+        let petIdToDelete = null;
+
+        // Abrir modal al hacer click en el botón eliminar
+        document.querySelectorAll('.delete-pet-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                // Obtenemos directamente el id desde el atributo data-id del botón
+                petIdToDelete = this.dataset.id;
+
+                const deleteModalEl = document.getElementById('deletePetModal');
+                const deleteModal = new bootstrap.Modal(deleteModalEl);
+                deleteModal.show();
+            });
+        });
+
+        // Confirmar eliminación desde el modal
+        document.getElementById('confirmDeletePetBtn').addEventListener('click', async function () {
+            if (!petIdToDelete) return;
+
+            const deleteModalEl = document.getElementById('deletePetModal');
+            const deleteModal = bootstrap.Modal.getInstance(deleteModalEl);
+
+            try {
+                const res = await fetch(`/pets/${petIdToDelete}/delete/`, {
+                    method: "POST",
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast(data.message, "success");
+                    {#reloadPage = true;#}
+
+                    // Cerrar el modal de confirmación
+                    if (deleteModal) deleteModal.hide();
+
+                    // Opcional: eliminar la tarjeta de la mascota sin recargar la página
+                    const card = document.querySelector(`.delete-pet-btn[data-id="${petIdToDelete}"]`).closest('.card');
+                    if (card) card.remove();
+
+                } else {
+                    showToast(data.message, "error");
+                }
+            } catch (error) {
+                console.error("Error al eliminar la mascota:", error);
+                showToast("No se pudo eliminar la mascota.", "error");
+            } finally {
+                petIdToDelete = null;
+            }
+        });
+
+        // RESETEAR FORMULARIO AL CERRAR MODAL
+        const petModal = document.getElementById('petModal');
+        petModal.addEventListener('hidden.bs.modal', function (event) {
+            const form = document.getElementById("petForm");
+            form.reset();
+            form.querySelector('#pet_id').value = '';
+            form.action = "{% url 'pets:create' %}";
+            form.classList.remove("was-validated");
+            const savePetButton = document.getElementById("btn-save-pet");
+            savePetButton.disabled = false;
+            savePetButton.hidden = false;
+            savePetButton.innerHTML = '<i class="bi bi-save"></i> Guardar';
+            if (reloadPage) {
+                location.reload();
+            }
+            const loadedImages = document.getElementById("loaded-images");
+            loadedImages.innerHTML = '';
+            const modal = document.getElementById('petModal');
+            const breedSelect = modal.querySelector('select[name="breed"]');
+            breedSelect.innerHTML = '<option value="">Seleccionar</option>';
+        });
+
+        function loadBreedsBySpecies(speciesId, breedId = null) {
+            const modal = document.getElementById('petModal');
+            const breedSelect = modal.querySelector('select[name="breed"]');
+
+            if (!breedSelect) return; // seguridad
+
+            breedSelect.innerHTML = '<option value="">Seleccionar</option>';
+
+            fetch(`/pets/api/breeds/${speciesId}/`) // o la URL que tengas para traer las razas
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(b => {
+                        const opt = document.createElement('option');
+                        opt.value = b.id;
+                        opt.text = b.name;
+                        if (breedId) {
+                            if (b.id === breedId) {
+                                opt.selected = true;
+                            }
+                        }
+                        breedSelect.appendChild(opt);
+                    });
+                });
+        }
+
+        document.getElementById('id_species').addEventListener('change', function () {
+            loadBreedsBySpecies(this.value);
+        });
+
+        // Boton clear-search-btn
+        document.querySelectorAll('.clear-search-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                window.location.href = "{% url 'pets:my_pets' %}";
+            });
+        });
+
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+
+        const imageInput = document.getElementById("imageInput");
+        const dropZone = document.getElementById("dropZone");
+        const previewContainer = document.getElementById("previewContainer");
+
+        let selectedImages = [];
+
+        dropZone.addEventListener("click", () => imageInput.click());
+
+        dropZone.addEventListener("dragover", e => {
+            e.preventDefault();
+            dropZone.classList.add("dragover");
+        });
+
+        dropZone.addEventListener("dragleave", () => {
+            dropZone.classList.remove("dragover");
+        });
+
+        dropZone.addEventListener("drop", e => {
+            e.preventDefault();
+            dropZone.classList.remove("dragover");
+            handleFiles(e.dataTransfer.files);
+        });
+
+        imageInput.addEventListener("change", e => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            [...files].forEach(file => {
+                if (!file.type.startsWith("image/")) return;
+
+                selectedImages.push(file);
+                renderPreview(file);
+            });
+
+            syncInputFiles();
+        }
+
+        function renderPreview(file) {
+            const reader = new FileReader();
+
+            reader.onload = e => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "position-relative";
+
+                wrapper.innerHTML = `
+            <img src="${e.target.result}"
+                 class="rounded border"
+                 style="width:120px; height:120px; object-fit:cover;">
+            <button type="button"
+                    class="btn btn-sm btn-danger position-absolute top-0 end-0"
+                    style="transform: translate(30%, -30%);">
+                ✕
+            </button>
+        `;
+
+                wrapper.querySelector("button").onclick = (e) => {
+                    e.stopPropagation(); // 🔥 ESTA LÍNEA
+                    selectedImages = selectedImages.filter(img => img !== file);
+                    wrapper.remove();
+                    syncInputFiles();
+                };
+
+                previewContainer.appendChild(wrapper);
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function syncInputFiles() {
+            const dataTransfer = new DataTransfer();
+            selectedImages.forEach(file => dataTransfer.items.add(file));
+            imageInput.files = dataTransfer.files;
+        }
+    </script>
 
 {% endblock %}

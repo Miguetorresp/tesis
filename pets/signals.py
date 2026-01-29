@@ -11,6 +11,7 @@ def generate_face_descriptors(sender, instance, created, **kwargs):
     Cuando se guarda una PetImage, si la mascota está marcada como perdida,
     extrae descriptores y los guarda en PetFaceDescriptor.
     """
+
     try:
         pet = instance.pet
     except Exception:
@@ -28,6 +29,7 @@ def generate_face_descriptors(sender, instance, created, **kwargs):
         return
 
     descriptors = extract_face_descriptors_from_path(image_path)
+
     for d in descriptors:
         PetFaceDescriptor.objects.create(
             pet=pet,
