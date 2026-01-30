@@ -1,9 +1,11 @@
 from django import forms
 from .models import Pet, PetImage, Species, Breed
 
+
 # 1. Crear el widget que acepta múltiples archivos
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
+
 
 # 2. Crear el campo que usa ese widget
 class MultipleFileField(forms.FileField):
@@ -19,6 +21,7 @@ class MultipleFileField(forms.FileField):
             result = single_file_clean(data, initial)
         return result
 
+
 class PetForm(forms.ModelForm):
     # Usar el nuevo campo personalizado
     images = MultipleFileField(
@@ -26,7 +29,7 @@ class PetForm(forms.ModelForm):
         required=False,
         widget=MultipleFileInput(attrs={'class': 'form-control', 'multiple': True})
     )
-    
+
     class Meta:
         model = Pet
         fields = [
@@ -34,19 +37,19 @@ class PetForm(forms.ModelForm):
             'sex', 'size', 'color', 'weight', 'description',
             'health_status', 'vaccinated', 'sterilized',
             'dewormed', 'microchipped', 'good_with_kids', 'good_with_dogs',
-            'good_with_cats'
+            'good_with_cats', 'ubication_details',
         ]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Agregar clases CSS a todos los campos
         for field_name, field in self.fields.items():
             if field_name != 'images':
                 field.widget.attrs['class'] = 'form-control'
-        
+
         # Filtrar razas dinámicamente
         if 'species' in self.data:
             try:

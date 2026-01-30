@@ -24,60 +24,95 @@
         <hr>
     </div>
 
-    <div class="pet-grid">
-        {% for pet in pets %}
-            <article class="pet-card">
-                {% if pet.images.all|length > 0 %}
-                    <img class="pet-image" src="{{ pet.images.all.0.image.url }}" alt="{{ pet.name }}">
-                {% elif pet.photo %}
-                    <img class="pet-image" src="{{ pet.photo.url }}" alt="{{ pet.name }}">
-                {% else %}
-                    <div class="pet-image" style="display:flex;align-items:center;justify-content:center;color:#999;">
-                        Sin imagen
-                    </div>
-                {% endif %}
-
-                <div class="pet-body">
-                    <div class="pet-title">{{ pet.name|default:"Sin nombre" }}</div>
-                    <div class="pet-meta">
-                        {% if pet.species %}{{ pet.species.name }}{% endif %}
-                        {% if pet.breed %} — {{ pet.breed.name }}{% endif %}
-                        {% if pet.sex %} • {{ pet.get_sex_display }}{% endif %}
-                    </div>
-
-                    {% if pet.reported_location %}
-                        <div class="pet-meta">Lugar reportado: {{ pet.reported_location }}</div>
-                    {% endif %}
-                    {% if pet.reported_at %}
-                        <div class="pet-meta">Reportado: {{ pet.reported_at|date:"d/m/Y H:i" }}</div>
-                    {% endif %}
-                    {% if pet.reporter_name %}
-                        <div class="pet-meta">Reportado por: {{ pet.reporter_name }}</div>
-                    {% endif %}
-
-                    <div class="pet-actions">
-                        <a class="btn btn-secondary" href="{% url 'pets:detail' pet.pk %}">Ver</a>
-                        {% if request.user.is_authenticated and pet.created_by == request.user %}
-                            <a class="btn btn-primary" href="{% url 'pets:edit' pet.pk %}">Editar</a>
-                        {% endif %}
-                    </div>
+    <div class="row g-2 mb-3">
+        <div class="col-6">
+            <form method="get" class="d-flex">
+                <label for="searchPet" class="form-label visually-hidden">Buscar mascota</label>
+                <div class="input-group">
+                    <input type="text"
+                           name="q"
+                           id="searchPet"
+                           class="form-control"
+                           placeholder="Buscar mascota por nombre..."
+                           aria-label="Buscar mascota"
+                           aria-describedby="basic-addon1"
+                           value="{{ query }}">
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
                 </div>
-            </article>
-        {% empty %}
-            <div class="col-12 mt-lg-5 text-muted text-center">
-                <i class="bi bi-folder-x fs-1"></i>
-                <p>No hay mascotas reportadas como perdidas.</p>
-            </div>
-        {% endfor %}
+                {% if query %}
+                    <button class="btn btn-outline-dark ms-3 clear-search-btn" type="button" data-bs-toggle="tooltip"
+                            data-bs-placement="right" title="Eliminar Filtro"><i class="bi bi-x-circle"></i>
+                    </button>
+                {% endif %}
+            </form>
+        </div>
     </div>
 
-    <div class="pagination" aria-label="Paginación">
-        {% if pets.has_previous %}
-            <a class="btn btn-secondary" href="?page={{ pets.previous_page_number }}">« Anterior</a>
-        {% endif %}
-        <span>Página {{ pets.number }} de {{ pets.paginator.num_pages }}</span>
-        {% if pets.has_next %}
-            <a class="btn btn-secondary" href="?page={{ pets.next_page_number }}">Siguiente »</a>
+    <div class="row">
+        {% if pets %}
+            <div id="petsContainer" class="row">
+                {% for pet in pets %}
+                    <div class="col-12 col-md-4 col-sm-6 col-xs-6 mt-3 pet-card">
+                        <div class="card mb-4 h-100 shadow-sm zoom-card">
+                            <div class="position-relative">
+                                {% if pet.primary_image %}
+                                    {% if pet.primary_image %}
+                                        <img src="{{ pet.primary_image.image.url }}" class="card-img-top"
+                                             alt="Foto de {{ pet.name }}">
+                                    {% endif %}
+                                {% else %}
+                                    <img src="{% static 'images/default_pet.png' %}" class="card-img-top"
+                                         alt="Foto por defecto">
+                                {% endif %}
+
+                                {% if pet.status == "lost" %}
+                                    <span class="badge bg-danger text-uppercase position-absolute top-0 end-0 m-2 px-3 py-2 opacity-75">
+                                        {{ pet.get_status_display }}
+                                    </span>
+                                {% elif pet.status == "found" %}
+                                    <span class="badge bg-success text-uppercase position-absolute top-0 end-0 m-2 px-3 py-2 opacity-75">
+                                        {{ pet.get_status_display }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <div class="card-body align-content-center">
+                                <h5 class="card-title mb-1">
+                                    {% if pet.sex == "M" %}
+                                        <i class="bi bi-gender-male text-blue"></i>
+                                    {% elif pet.sex == "F" %}
+                                        <i class="bi bi-gender-female text-pink"></i>
+                                    {% else %}
+                                        <i class="bi bi-gender-ambiguous"></i>
+                                    {% endif %}
+                                    {{ pet.name }}
+                                </h5>
+                                <p class="card-text mb-2">{{ pet.species }} - {{ pet.breed|default:"Sin raza" }}</p>
+                                <p class="card-text mb-2 text-muted"><i class="bi bi-geo-alt-fill"></i> Última vez
+                                    visto: {{ pet.ubication_details }}</p>
+                            </div>
+                            <div class="card-footer border-0 text-end px-3 justify-content-between">
+                                <button class="btn btn-secondary me-2 edit-pet-btn"
+                                        data-id="{{ pet.id }}">
+                                    <i class="bi bi-eye me-1"></i>
+                                </button>
+                                <button class="btn btn-primary me-2 edit-pet-btn"
+                                        data-id="{{ pet.id }}">
+                                    <i class="bi bi-pencil me-1"></i>
+                                </button>
+                                <button class="btn btn-outline-danger delete-pet-btn" data-id="{{ pet.id }}"
+                                        title="Eliminar" style="flex-shrink:0; width:45px;">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="col-12 mt-lg-5 text-muted text-center">
+                <i class="bi bi-folder-x fs-1"></i>
+                <p>No se encontraron mascotas</p>
+            </div>
         {% endif %}
     </div>
 
@@ -179,7 +214,7 @@
                         <div class="row m-0">
                             <div class="col-12 mt-3">
                                 <label class="form-label">Detalles de Ubicación</label>
-                                <textarea name="ubication_detail" class="form-control" rows="3"
+                                <textarea name="ubication_details" class="form-control" rows="3"
                                           placeholder="Describe la ubicación donde se perdió la mascota"
                                           required></textarea>
                             </div>
@@ -297,11 +332,12 @@
             }
             e.preventDefault();
             const savePetButton = document.getElementById("btn-save-pet");
-            savePetButton.disabled = true;
+            {#savePetButton.disabled = true;#}
             savePetButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2 text-light" role="status" aria-hidden="true"></span> Guardando...';
             const formData = new FormData(form);
-            formData.append('assign_user', 'true');
+            formData.append('assign_user', 'false');
             formData.append('is_lost_report', 'true');
+            formData.append('status', 'lost');
             const res = await fetch(form.action, {
                 method: "POST",
                 body: formData,
@@ -311,7 +347,7 @@
             if (response.success) {
                 //window.location.href = "/user/dashboard/";
                 showToast(response.message, "success");
-                savePetButton.hidden = true;
+                {#savePetButton.hidden = true;#}
                 reloadPage = true;
             } else {
                 showToast(response.message, "error");

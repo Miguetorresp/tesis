@@ -236,10 +236,9 @@ def extract_orb_features(image_path):
 
 def extract_face_descriptors_from_path(image_path):
     """
-    Función principal que extrae todos los descriptores de una imagen de mascota.
-    Compatible con tu estructura anterior pero usando modelos especializados.
+    Función principal que extrae el MEJOR descriptor de una imagen de mascota.
 
-    Retorna: lista de dicts con formato:
+    Retorna: lista con UN SOLO dict (el más confiable):
     {
         'algorithm': str,
         'descriptor': [floats],
@@ -255,13 +254,13 @@ def extract_face_descriptors_from_path(image_path):
         print("✗ No se pudo cargar la imagen")
         return []
 
-    descriptors = []
+    all_descriptors = []
 
     # 1. Extraer ResNet embedding (PRINCIPAL - más confiable)
     print("Extrayendo ResNet50 embedding...")
     resnet_desc = extract_resnet_embedding(image_path)
     if resnet_desc:
-        descriptors.append(resnet_desc)
+        all_descriptors.append(resnet_desc)
         print(f"✓ ResNet50: {len(resnet_desc['descriptor'])} dimensiones, "
               f"animal detectado: {resnet_desc['animal_type']}, "
               f"confianza: {resnet_desc['confidence']:.2f}")
@@ -270,22 +269,42 @@ def extract_face_descriptors_from_path(image_path):
     print("Extrayendo SIFT features...")
     sift_desc = extract_sift_features(image_path)
     if sift_desc:
-        descriptors.append(sift_desc)
-        print(f"✓ SIFT: {sift_desc['keypoints_count']} keypoints detectados")
+        all_descriptors.append(sift_desc)
+        print(f"✓ SIFT: {sift_desc['keypoints_count']} keypoints detectados, "
+              f"confianza: {sift_desc['confidence']:.2f}")
 
     # 3. Extraer ORB features (rápido, complementario)
     print("Extrayendo ORB features...")
     orb_desc = extract_orb_features(image_path)
     if orb_desc:
-        descriptors.append(orb_desc)
-        print(f"✓ ORB: {orb_desc['keypoints_count']} keypoints detectados")
+        all_descriptors.append(orb_desc)
+        print(f"✓ ORB: {orb_desc['keypoints_count']} keypoints detectados, "
+              f"confianza: {orb_desc['confidence']:.2f}")
 
-    if not descriptors:
+    if not all_descriptors:
         print("✗ No se pudieron extraer descriptores")
-    else:
-        print(f"✓ Total: {len(descriptors)} descriptores extraídos")
+        return []
 
-    return descriptors
+    # SELECCIONAR EL DESCRIPTOR MÁS CONFIABLE
+    # Prioridad:
+    # 1. ResNet50 (si confidence > 0.4)
+    # 2. El de mayor confidence entre todos
+
+    best_descriptor = None
+
+    # Buscar ResNet50 primero
+    resnet_descriptors = [d for d in all_descriptors if d['algorithm'] == 'resnet50']
+    if resnet_descriptors and resnet_descriptors[0]['confidence'] >= 0.40:
+        best_descriptor = resnet_descriptors[0]
+        print(f"\n Descriptor seleccionado: ResNet50 (confianza: {best_descriptor['confidence']:.2%})")
+    else:
+        # Si ResNet no es confiable, tomar el de mayor confidence
+        best_descriptor = max(all_descriptors, key=lambda x: x.get('confidence', 0))
+        print(f"\n Descriptor seleccionado: {best_descriptor['algorithm']} "
+              f"(confianza: {best_descriptor['confidence']:.2%})")
+
+    # Retornar solo el mejor
+    return [best_descriptor]
 
 
 def compare_descriptors(desc1, desc2, algorithm):

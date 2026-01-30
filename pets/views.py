@@ -243,7 +243,6 @@ def my_pets(request):
         "status_choices": status_choices,
         "breeds": breeds,
     }
-    print('ss', context)
     return render(request, 'pets/my_pets.html', context)
 
 
@@ -255,6 +254,7 @@ def get_breeds_by_species(request, species_id):
 
 def create_lost_pet(request):
     """Crear una nueva mascota vía AJAX/Fetch"""
+    print('request', request)
     if request.method == 'POST':
         # Si envías FormData con 'name' y demás campos
         form = PetForm(request.POST, request.FILES)
@@ -264,8 +264,8 @@ def create_lost_pet(request):
             assign_user = request.POST.get('assign_user', 'false').lower() == 'true'
             is_lost_report = request.POST.get('is_lost_report', 'false').lower() == 'true'
             pet.is_lost_report = is_lost_report
-            if assign_user:
-                pet.user = request.user
+            # if assign_user:
+            #     pet.user = request.user
 
             pet.created_by = request.user
             pet.save()
@@ -283,7 +283,7 @@ def create_lost_pet(request):
             return JsonResponse({
                 'success': True,
                 # 'message': f'Mascota "{pet.name}" creada con éxito.',
-                'message': f'Mascota creada con éxito.',
+                'message': f'Mascota reportada con éxito.',
                 'pet_id': pet.pk
             })
 
@@ -298,65 +298,36 @@ def create_lost_pet(request):
 
 
 def lost_list(request):
-    """
-    Lista las mascotas reportadas como perdidas.
-    Intenta detectar campos comunes en el modelo `Pet` para filtrar:
-    - booleanos: is_lost, reported_lost, created_from_lost_form
-    - status: 'lost' / 'perdida' / 'perdido'
-    Si no existe campo, devuelve queryset vacío.
-    """
+    """Mascotas reportadas por el usuario actual si es is_lost_report true y created_by el usuario"""
+    user_data = request.session.get("user_data")
+    # Obtener el query de búsqueda
+    query = request.GET.get('q', '')
+    pets = Pet.objects.filter(created_by=request.user, is_lost_report=True).select_related('species', 'breed')
+    # serializer = PetSerializer(pets, context={'request': request})
+    # print(serializer.data)
+    # Filtrar por nombre si hay query
+    if query:
+        pets = pets.filter(name__icontains=query)
+    # Paginación: máximo 10 por página
+    paginator = Paginator(pets, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     species = Species.objects.all()
     sex_choices = Pet.SEX_CHOICES
     size_choices = Pet.SIZE_CHOICES
-    breeds = Breed.objects.all()
     health_choices = Pet.HEALTH_STATUS_CHOICES
     status_choices = Pet.STATUS_CHOICES
-
-    pet_model = Pet
-    qs = None
-    # campos que podrías tener; ajusta si usas otro nombre
-    boolean_fields = ['is_lost', 'reported_lost', 'created_from_lost_form']
-    for fname in boolean_fields:
-        try:
-            pet_model._meta.get_field(fname)
-        except FieldDoesNotExist:
-            continue
-        qs = Pet.objects.filter(**{fname: True})
-        break
-
-    if qs is None:
-        # intentar campo "status"
-        try:
-            pet_model._meta.get_field('status')
-            qs = Pet.objects.filter(status__in=['lost', 'perdida', 'perdido'])
-        except FieldDoesNotExist:
-            qs = Pet.objects.none()
-
-    # ordenar: preferir created_at si existe, si no usar id descendente
-    try:
-        pet_model._meta.get_field('created_at')
-        qs = qs.order_by('-created_at')
-    except FieldDoesNotExist:
-        qs = qs.order_by('-id')
-
-    # paginación simple
-    page = request.GET.get('page', 1)
-    paginator = Paginator(qs, 12)
-    try:
-        pets_page = paginator.page(page)
-    except PageNotAnInteger:
-        pets_page = paginator.page(1)
-    except EmptyPage:
-        pets_page = paginator.page(paginator.num_pages)
-
+    breeds = Breed.objects.all()
     context = {
-        'pets': pets_page,
+        'pets': page_obj,
+        'query': query,
+        "user": user_data,
         "species": species,
         "sex_choices": sex_choices,
         "size_choices": size_choices,
-        "breeds": breeds,
         "health_choices": health_choices,
         "status_choices": status_choices,
+        "breeds": breeds,
     }
-
     return render(request, 'pets/lost_list.html', context)

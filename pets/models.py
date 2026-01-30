@@ -58,6 +58,8 @@ class Pet(models.Model):
         ('pending', 'Adopción Pendiente'),
         ('adopted', 'Adoptado'),
         ('unavailable', 'No Disponible'),
+        ('lost', 'Perdido'),
+        ('found', 'Encontrado'),
     ]
 
     HEALTH_STATUS_CHOICES = [
@@ -140,7 +142,7 @@ class Pet(models.Model):
     )
 
     is_lost_report = models.BooleanField(default=False, db_index=True)
-    reported_at = models.DateTimeField(null=True, blank=True)
+    reported_at = models.DateTimeField(null=True, blank=True, auto_now_add=True, verbose_name='Fecha de reporte')
     reported_location = models.CharField(max_length=255, null=True, blank=True)
     reporter_name = models.CharField(max_length=100, null=True, blank=True)
     ubication_details = models.TextField(null=True, blank=True)
@@ -216,7 +218,7 @@ class PetFaceDescriptor(models.Model):
     pet = models.ForeignKey('Pet', related_name='face_descriptors', on_delete=models.CASCADE)
     pet_image = models.ForeignKey('PetImage', related_name='face_descriptors', on_delete=models.CASCADE)
     algorithm = models.CharField(max_length=50, choices=ALGORITHM_CHOICES)  # ej: "face_recognition+opencv"
-    # descriptor = models.JSONField()  # lista de floats (embeddings) - requiere Django >=3.1 o Postgres JSONField
+    descriptor = models.JSONField()  # lista de floats (embeddings) - requiere Django >=3.1 o Postgres JSONField
 
     # Para descriptores clásicos (SIFT/ORB) que pueden ser muchos keypoints
     # Los guardamos como JSON si son múltiples vectores
