@@ -32,7 +32,7 @@
                     <input type="text"
                            name="q"
                            id="searchPet"
-                           class="form-control"
+                           class="form-control bg-white"
                            placeholder="Buscar mascota por nombre..."
                            aria-label="Buscar mascota"
                            aria-describedby="basic-addon1"
@@ -90,8 +90,8 @@
                                 <p class="card-text mb-2 text-muted"><i class="bi bi-geo-alt-fill"></i> Última vez
                                     visto: {{ pet.ubication_details }}</p>
                             </div>
-                            <div class="card-footer border-0 text-end px-3 justify-content-between">
-                                <button class="btn btn-secondary me-2 edit-pet-btn"
+                            <div class="card-footer border-0 text-end px-3 justify-content-between ">
+                                <button class="btn btn-secondary me-2 view-pet-btn"
                                         data-id="{{ pet.id }}">
                                     <i class="bi bi-eye me-1"></i>
                                 </button>
@@ -170,7 +170,20 @@
                             <h6 class="text-uppercase text-primary small">Edad y características físicas</h6>
                         </div>
                         <div class="row m-0">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label class="form-label">Años</label>
+                                <input name="age_years" type="number" min="0" max="30" class="form-control"
+                                       placeholder="0" required>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label">Meses</label>
+                                <input name="age_months" type="number" min="0" max="11" class="form-control"
+                                       placeholder="0" required>
+                            </div>
+                        </div>
+                        <div class="row m-0">
+                            <div class="col-md-4 mt-3">
                                 <label class="form-label">Sexo</label>
                                 <select name="sex" class="form-select" required>
                                     <option value="">Seleccionar</option>
@@ -179,7 +192,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-4 mt-3">
                                 <label class="form-label">Tamaño</label>
                                 <select name="size" class="form-select" required>
                                     <option value="">Seleccionar</option>
@@ -188,7 +201,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-4 mt-3">
                                 <label class="form-label">Color</label>
                                 <input name="color" type="text" class="form-control" placeholder="Ej: Marrón y blanco"
                                        required>
@@ -304,7 +317,7 @@
                             aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <h6>¿Estás seguro de que deseas eliminar esta mascota?</h6>
+                    <h6>¿Estás seguro de que deseas eliminar esta mascota reportada?</h6>
                     <p>Esta acción no se puede deshacer.</p>
                 </div>
                 <div class="modal-footer">
@@ -315,6 +328,186 @@
                         Eliminar
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Mascota Reportada -->
+    <div class="modal fade" id="viewPetModal" tabindex="-1" aria-labelledby="viewPetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="deletePetModalLabel"><i class="bi bi-eye me-1"></i> Ver mascota
+                        reportada</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Cerrar"></button>
+                </div>
+
+                <!-- Body del Modal -->
+                <div class="modal-body px-4 pb-4">
+                    <!-- Nombre de la mascota -->
+                    <div class="mb-3 text-center alert alert-primary">
+                        <h3 class="fw-bold mb-1 text-dark" id="pet-name">-</h3>
+                        <p class="text-muted mb-0">
+                            <span id="pet-species">-</span> • <span id="pet-breed">-</span>
+                        </p>
+                    </div>
+                    <div class="row g-4">
+                        <!-- Columna Izquierda: Galería de Imágenes -->
+                        <div class="col-md-5 align-content-center">
+                            <div id="pet-image-container" class="position-relative">
+                                <!-- Carousel de imágenes -->
+                                <div id="petImagesCarousel" class="carousel slide rounded-3 overflow-hidden shadow-sm"
+                                     data-bs-ride="carousel">
+                                    <div class="carousel-inner" id="pet-carousel-inner">
+                                        <!-- Las imágenes se cargarán dinámicamente aquí -->
+                                    </div>
+
+                                    <!-- Controles del carousel -->
+                                    <button class="carousel-control-prev d-none" type="button"
+                                            data-bs-target="#petImagesCarousel" data-bs-slide="prev" id="carousel-prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Anterior</span>
+                                    </button>
+                                    <button class="carousel-control-next d-none" type="button"
+                                            data-bs-target="#petImagesCarousel" data-bs-slide="next" id="carousel-next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Siguiente</span>
+                                    </button>
+
+                                    <!-- Indicadores -->
+                                    <div class="carousel-indicators mb-2" id="carousel-indicators"></div>
+                                </div>
+
+                                <!-- Badge de estado -->
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    <span class="badge text-uppercase position-absolute top-0 end-0  px-3 py-2 opacity-75"
+                                          id="pet-status-badge">
+                                        <span id="pet-status-text">Perdido</span>
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Columna Derecha: Información de la Mascota -->
+                        <div class="col-md-7">
+                            <!-- Información básica en cards -->
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="card border-0 bg-light h-100">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-calendar3 text-primary me-2"></i>
+                                                <div>
+                                                    <small class="text-muted d-block">Edad</small>
+                                                    <strong id="pet-age">-</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="card border-0 bg-light h-100">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-gender-ambiguous text-primary  me-2"></i>
+                                                <div>
+                                                    <small class="text-muted d-block">Sexo</small>
+                                                    <strong id="pet-sex">-</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="card border-0 bg-light h-100">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-palette text-primary  me-2"></i>
+                                                <div>
+                                                    <small class="text-muted d-block">Color</small>
+                                                    <strong id="pet-color">-</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="card border-0 bg-light h-100">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-rulers text-primary  me-2"></i>
+                                                <div>
+                                                    <small class="text-muted d-block">Tamaño</small>
+                                                    <strong id="pet-size">-</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Peso y Estado de Salud -->
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="d-flex align-items-center p-2 bg-light rounded">
+                                        <i class="bi bi-heart-pulse text-danger me-2"></i>
+                                        <div>
+                                            <small class="text-muted d-block">Estado de Salud</small>
+                                            <strong id="pet-health-status">-</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {#                                <div class="col-6">#}
+                                {#                                    <div class="d-flex align-items-center p-2 bg-light rounded">#}
+                                {#                                        <i class="bi bi-speedometer2 text-success me-2"></i>#}
+                                {#                                        <div>#}
+                                {#                                            <small class="text-muted d-block">Tamaño</small>#}
+                                {#                                            <strong><span id="pet-weight">-</span></strong>#}
+                                {#                                        </div>#}
+                                {#                                    </div>#}
+                                {#                                </div>#}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-4 mt-2">
+                        <div class="col-12">
+                            <!-- Descripción -->
+                            <div class="mb-3" id="pet-description-container">
+                                <h6 class="fw-bold mb-2">
+                                    <i class="bi bi-card-text text-primary me-2"></i>Descripción
+                                </h6>
+                                <p class="text-muted mb-0 small" id="pet-description">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <!-- Ubicación -->
+                            <div class="mb-3" id="pet-location-container">
+                                <h6 class="fw-bold mb-2">
+                                    <i class="bi bi-geo-alt-fill text-danger me-2"></i>Última ubicación conocida
+                                </h6>
+                                <p class="text-muted mb-0 small" id="pet-location">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Footer del Modal -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i> Cerrar
+                    </button>
+                    {#                    <button type="button" class="btn btn-primary" id="contact-owner-btn">#}
+                    {#                        <i class="bi bi-telephone me-2"></i>Contactar#}
+                    {#                    </button>#}
+                </div>
+
             </div>
         </div>
     </div>
@@ -391,8 +584,6 @@
                         setValue('select[name="species"]', pet.species);
                         loadBreedsBySpecies(pet.species, pet.breed);
                         {#setValue('select[name="breed"]', pet.breed || "");#}
-
-
                         setValue('input[name="age_years"]', pet.age_years);
                         setValue('input[name="age_months"]', pet.age_months);
                         setValue('select[name="sex"]', pet.sex);
@@ -400,17 +591,9 @@
                         setValue('input[name="color"]', pet.color);
                         setValue('input[name="weight"]', pet.weight);
                         setValue('textarea[name="description"]', pet.description);
+                        setValue('textarea[name="ubication_details"]', pet.ubication_details);
                         setValue('select[name="health_status"]', pet.health_status);
                         setValue('select[name="status"]', pet.status);
-
-                        // Asignar valores a checkboxes
-                        setChecked('input[name="vaccinated"]', pet.vaccinated);
-                        setChecked('input[name="sterilized"]', pet.sterilized);
-                        setChecked('input[name="dewormed"]', pet.dewormed);
-                        setChecked('input[name="microchipped"]', pet.microchipped);
-                        setChecked('input[name="good_with_kids"]', pet.good_with_kids);
-                        setChecked('input[name="good_with_dogs"]', pet.good_with_dogs);
-                        setChecked('input[name="good_with_cats"]', pet.good_with_cats);
 
                         //Agregar imagenes cargadas
                         if (pet.images.length > 0) {
@@ -507,6 +690,175 @@
             });
         });
 
+        // VER MASCOTA REPORTADA
+        // ==========================================
+        // JAVASCRIPT PARA EL MODAL
+        // ==========================================
+
+        document.querySelectorAll('.view-pet-btn').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                const petId = this.dataset.id;
+
+                try {
+                    const res = await fetch(`/pets/${petId}/`);
+                    const data = await res.json(); // solo una vez
+
+                    if (data.success) {
+                        const pet = data.pet;
+                        console.log('pet', pet);
+
+                        // Mostrar el modal
+                        const modal = new bootstrap.Modal(document.getElementById('viewPetModal'));
+                        modal.show();
+
+                        // --- INFORMACIÓN BÁSICA ---
+                        document.getElementById('pet-name').textContent = pet.name || 'Sin nombre';
+                        document.getElementById('pet-species').textContent = pet.species_name || '-';
+                        document.getElementById('pet-breed').textContent = pet.breed_name || 'Mestizo';
+
+                        // Edad
+                        let ageText = '';
+                        if (pet.age_years && pet.age_months) {
+                            ageText = `${pet.age_years} años, ${pet.age_months} meses`;
+                        } else if (pet.age_years) {
+                            ageText = `${pet.age_years} años`;
+                        } else if (pet.age_months) {
+                            ageText = `${pet.age_months} meses`;
+                        } else {
+                            ageText = 'No especificada';
+                        }
+                        document.getElementById('pet-age').textContent = ageText;
+
+                        // Otros datos
+                        document.getElementById('pet-sex').textContent = pet.sex_display || '-';
+                        document.getElementById('pet-color').textContent = pet.color || '-';
+                        document.getElementById('pet-size').textContent = pet.size_display || '-';
+                        {#document.getElementById('pet-weight').textContent = pet.weight || '-';#}
+                        document.getElementById('pet-health-status').textContent = pet.health_status_display || '-';
+
+                        // --- DESCRIPCIÓN ---
+                        const descContainer = document.getElementById('pet-description-container');
+                        if (pet.description && pet.description.trim() !== '') {
+                            document.getElementById('pet-description').textContent = pet.description;
+                            descContainer.classList.remove('d-none');
+                        } else {
+                            descContainer.classList.add('d-none');
+                        }
+
+                        // --- UBICACIÓN ---
+                        const locationContainer = document.getElementById('pet-location-container');
+                        if (pet.ubication_details && pet.ubication_details.trim() !== '') {
+                            document.getElementById('pet-location').textContent = pet.ubication_details;
+                            locationContainer.classList.remove('d-none');
+                        } else {
+                            locationContainer.classList.add('d-none');
+                        }
+
+                        // --- ESTADO (Badge) ---
+                        const statusBadge = document.getElementById('pet-status-badge');
+                        const statusText = document.getElementById('pet-status-text');
+
+                        statusText.textContent = pet.status_display || 'Perdido';
+
+                        // Cambiar color del badge según el estado
+                        statusBadge.className = 'badge text-uppercase position-absolute top-0 end-0 m-2 px-3 py-2 opacity-75';
+                        if (pet.status === 'lost') {
+                            statusBadge.classList.add('bg-danger');
+                        } else if (pet.status === 'found') {
+                            statusBadge.classList.add('bg-success');
+                        } else if (pet.status === 'pending') {
+                            statusBadge.classList.add('bg-info');
+                        } else if (pet.status === 'available') {
+                            statusBadge.classList.add('bg-info');
+                        } else {
+                            statusBadge.classList.add('bg-warning');
+                        }
+
+                        // --- GALERÍA DE IMÁGENES ---
+                        const carouselInner = document.getElementById('pet-carousel-inner');
+                        const carouselIndicators = document.getElementById('carousel-indicators');
+                        const carouselPrev = document.getElementById('carousel-prev');
+                        const carouselNext = document.getElementById('carousel-next');
+
+                        // Limpiar contenido previo
+                        carouselInner.innerHTML = '';
+                        carouselIndicators.innerHTML = '';
+
+                        if (pet.images && pet.images.length > 0) {
+                            // Agregar imágenes al carousel
+                            pet.images.forEach((imgObj, index) => {
+                                // Item del carousel
+                                const itemDiv = document.createElement('div');
+                                itemDiv.className = "carousel-item" + (index === 0 ? " active" : "");
+
+                                const img = document.createElement("img");
+                                img.src = imgObj.image;
+                                img.className = "d-block w-100 rounded";
+                                img.alt = `Foto ${index + 1} de ${pet.name}`;
+
+                                itemDiv.appendChild(img);
+                                carouselInner.appendChild(itemDiv);
+
+                                // Indicador
+                                const indicator = document.createElement('button');
+                                indicator.type = 'button';
+                                indicator.setAttribute('data-bs-target', '#petImagesCarousel');
+                                indicator.setAttribute('data-bs-slide-to', index);
+                                if (index === 0) {
+                                    indicator.classList.add('active');
+                                    indicator.setAttribute('aria-current', 'true');
+                                }
+                                indicator.setAttribute('aria-label', `Slide ${index + 1}`);
+                                carouselIndicators.appendChild(indicator);
+                            });
+
+                            // Mostrar controles solo si hay más de 1 imagen
+                            if (pet.images.length > 1) {
+                                carouselPrev.classList.remove('d-none');
+                                carouselNext.classList.remove('d-none');
+                                carouselIndicators.classList.remove('d-none');
+                            } else {
+                                carouselPrev.classList.add('d-none');
+                                carouselNext.classList.add('d-none');
+                                carouselIndicators.classList.add('d-none');
+                            }
+                        } else {
+                            // Si no hay imágenes, mostrar placeholder
+                            const itemDiv = document.createElement('div');
+                            itemDiv.className = "carousel-item active";
+                            itemDiv.innerHTML = `
+                                <div class="d-flex align-items-center justify-content-center bg-light rounded" style="height: 350px;">
+                                    <div class="text-center text-muted">
+                                        <i class="bi bi-image fs-1 mb-2"></i>
+                                        <p class="mb-0">Sin imágenes</p>
+                                    </div>
+                                </div>
+                            `;
+                            carouselInner.appendChild(itemDiv);
+
+                            // Ocultar controles e indicadores
+                            carouselPrev.classList.add('d-none');
+                            carouselNext.classList.add('d-none');
+                            carouselIndicators.classList.add('d-none');
+                        }
+
+                        // --- BOTÓN DE CONTACTO ---
+                        //document.getElementById('contact-owner-btn').onclick = function () {
+                        //    console.log('Contactar sobre mascota ID:', pet.id);
+                        //    alert('Funcionalidad de contacto - Implementar según tu necesidad');
+                        //};
+
+                    } else {
+                        console.error('Error en la respuesta:', data.message);
+                        alert(data.message || 'No se pudieron cargar los datos de la mascota.');
+                    }
+                } catch (error) {
+                    console.error("Error al cargar los datos de la mascota:", error);
+                    alert("No se pudieron cargar los datos de la mascota.");
+                }
+            });
+        });
+
         // Confirmar eliminación desde el modal
         document.getElementById('confirmDeletePetBtn').addEventListener('click', async function () {
             if (!petIdToDelete) return;
@@ -600,7 +952,7 @@
         // Boton clear-search-btn
         document.querySelectorAll('.clear-search-btn').forEach(btn => {
             btn.addEventListener('click', function () {
-                window.location.href = "{% url 'pets:my_pets' %}";
+                window.location.href = "{% url 'pets:lost_list' %}";
             });
         });
 

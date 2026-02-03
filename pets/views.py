@@ -266,7 +266,7 @@ def create_lost_pet(request):
             pet.is_lost_report = is_lost_report
             # if assign_user:
             #     pet.user = request.user
-
+            print('pet', pet)
             pet.created_by = request.user
             pet.save()
 
