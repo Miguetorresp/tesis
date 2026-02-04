@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Coincidencias - {{ pet.name }}{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">
+                            Coincidencias para: {{ pet.name|default:"Mascota sin nombre" }}
+                        </h1>
+                        <p class="text-gray-600 mt-2">
+                            <span class="font-semibold">{{ pet.species.name }}</span>
+                            {% if pet.breed %}- {{ pet.breed.name }}{% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <button
+                                onclick="runManualMatch()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
+                        >
+                            🔍 Buscar Nuevas Coincidencias
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+                <div class="flex gap-4">
+                    <select id="statusFilter" class="px-4 py-2 border rounded-lg" onchange="filterMatches()">
+                        <option value="">Todos los estados</option>
+                        <option value="pending">Pendiente</option>
+                        <option value="confirmed">Confirmado</option>
+                        <option value="rejected">Rechazado</option>
+                        <option value="contacted">Contactado</option>
+                    </select>
+
+                    <select id="similarityFilter" class="px-4 py-2 border rounded-lg" onchange="filterMatches()">
+                        <option value="0">Todas las similitudes</option>
+                        <option value="85">Alta confianza (≥85%)</option>
+                        <option value="70">Confianza media (≥70%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div id="loading" class="hidden text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                <p class="mt-4 text-gray-600">Buscando coincidencias...</p>
+            </div>
+
+            <!-- Lista de coincidencias -->
+            <div id="matchesList" class="space-y-4">
+                <!-- Se llenará dinámicamente -->
+            </div>
+
+            <!-- Sin resultados -->
+            <div id="noMatches" class="hidden text-center py-12">
+                <div class="text-6xl mb-4">🔍</div>
+                <h3 class="text-xl font-semibold text-gray-700">No se encontraron coincidencias</h3>
+                <p class="text-gray-600 mt-2">Intenta ajustar los filtros o buscar nuevas coincidencias</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const petId = {{ pet.id }};
+        let allMatches = [];
+
+        // Cargar coincidencias al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMatches();
+        });
+
+        async function loadMatches() {
+            try {
+                const statusFilter = document.getElementById('statusFilter').value;
+                const similarityFilter = document.getElementById('similarityFilter').value;
+
+                let url = `/api/pets/${petId}/matches/?`;
+                if (statusFilter) url += `status=${statusFilter}&`;
+                if (similarityFilter) url += `min_similarity=${similarityFilter}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    allMatches = data.matches;
+                    renderMatches(data.matches);
+                }
+            } catch (error) {
+                console.error('Error cargando coincidencias:', error);
+            }
+        }
+
+        function renderMatches(matches) {
+            const container = document.getElementById('matchesList');
+            const noMatches = document.getElementById('noMatches');
+
+            if (matches.length === 0) {
+                container.classList.add('hidden');
+                noMatches.classList.remove('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            noMatches.classList.add('hidden');
+
+            container.innerHTML = matches.map(match => `
+        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
+            <div class="flex">
+                <!-- Imagen -->
+                <div class="w-48 h-48 flex-shrink-0">
+                    ${match.found_pet.primary_image
+                ? `<img src="${match.found_pet.primary_image}" alt="${match.found_pet.name}" class="w-full h-full object-cover">`
+                : `<div class="w-full h-full bg-gray-200 flex items-center justify-center text-6xl">🐾</div>`
+            }
+                </div>
+
+                <!-- Información -->
+                <div class="flex-1 p-6">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">${match.found_pet.name}</h3>
+                            <p class="text-gray-600">${match.found_pet.species} - ${match.found_pet.breed}</p>
+                            <p class="text-sm text-gray-500 mt-1">
+                                📍 ${match.found_pet.location || 'Ubicación no especificada'}
+                            </p>
+                        </div>
+
+                        <!-- Score de similitud -->
+                        <div class="text-center">
+                            <div class="text-3xl font-bold ${getSimilarityColor(match.similarity_score)}">
+                                ${match.similarity_score.toFixed(1)}%
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">similitud</div>
+                            ${match.is_high_confidence
+                ? '<span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded mt-2">Alta confianza</span>'
+                : '<span class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded mt-2">Confianza media</span>'
+            }
+                        </div>
+                    </div>
+
+                    <!-- Detalles -->
+                    <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-600">Color:</span>
+                            <span class="font-semibold">${match.found_pet.color}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Tamaño:</span>
+                            <span class="font-semibold">${match.found_pet.size}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Reportado:</span>
+                            <span class="font-semibold">${new Date(match.found_pet.reported_at).toLocaleDateString()}</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600">Estado:</span>
+                            <span class="inline-block px-2 py-1 rounded text-xs ${getStatusColor(match.status)}">
+                                ${getStatusText(match.status)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Acciones -->
+                    <div class="mt-4 flex gap-2">
+                        <button
+                            onclick="updateMatchStatus(${match.id}, 'confirmed')"
+                            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition"
+                        >
+                            ✓ Confirmar
+                        </button>
+                        <button
+                            onclick="updateMatchStatus(${match.id}, 'contacted')"
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition"
+                        >
+                            📞 Contactado
+                        </button>
+                        <button
+                            onclick="updateMatchStatus(${match.id}, 'rejected')"
+                            class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition"
+                        >
+                            ✗ Rechazar
+                        </button>
+                        <a
+                            href="/pets/${match.found_pet.id}/"
+                            target="_blank"
+                            class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm transition"
+                        >
+                            👁️ Ver detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+        }
+
+        function getSimilarityColor(score) {
+            if (score >= 85) return 'text-green-600';
+            if (score >= 70) return 'text-yellow-600';
+            return 'text-orange-600';
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'pending': 'bg-gray-100 text-gray-800',
+                'confirmed': 'bg-green-100 text-green-800',
+                'rejected': 'bg-red-100 text-red-800',
+                'contacted': 'bg-blue-100 text-blue-800'
+            };
+            return colors[status] || 'bg-gray-100 text-gray-800';
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                'pending': 'Pendiente',
+                'confirmed': 'Confirmado',
+                'rejected': 'Rechazado',
+                'contacted': 'Contactado'
+            };
+            return texts[status] || status;
+        }
+
+        async function updateMatchStatus(matchId, newStatus) {
+            try {
+                const response = await fetch(`/api/matches/${matchId}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({status: newStatus})
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Recargar coincidencias
+                    loadMatches();
+                    alert('Estado actualizado correctamente');
+                }
+            } catch (error) {
+                console.error('Error actualizando estado:', error);
+                alert('Error al actualizar el estado');
+            }
+        }
+
+        async function runManualMatch() {
+            const loading = document.getElementById('loading');
+            const matchesList = document.getElementById('matchesList');
+
+            loading.classList.remove('hidden');
+            matchesList.classList.add('hidden');
+
+            try {
+                const response = await fetch(`/api/pets/${petId}/match/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        threshold: 70.0,
+                        top_k: 20,
+                        use_filters: true
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`¡Búsqueda completada! Se encontraron ${data.matches_found} coincidencias.`);
+                    loadMatches();
+                }
+            } catch (error) {
+                console.error('Error en búsqueda:', error);
+                alert('Error al buscar coincidencias');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        function filterMatches() {
+            loadMatches();
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+{% endblock %}

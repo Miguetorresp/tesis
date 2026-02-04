@@ -116,6 +116,47 @@
         {% endif %}
     </div>
 
+    {% if pets.has_other_pages %}
+        <nav aria-label="Paginación de mascotas">
+            <ul class="pagination justify-content-center mt-4">
+                {% if pets.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&page={{ pets.previous_page_number }}"
+                           aria-label="Anterior">
+                            <span aria-hidden="true">Anterior</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Anterior</span>
+                    </li>
+                {% endif %}
+
+                {% for num in pets.paginator.page_range %}
+                    {% if pets.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > pets.number|add:'-3' and num < pets.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?q={{ query }}&page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pets.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?q={{ query }}&page={{ pets.next_page_number }}"
+                           aria-label="Siguiente">
+                            <span aria-hidden="true">Siguiente</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Siguiente</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
     <div class="modal fade" id="petModal" tabindex="-1" aria-labelledby="modalTitlePet" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -529,7 +570,7 @@
             savePetButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2 text-light" role="status" aria-hidden="true"></span> Guardando...';
             const formData = new FormData(form);
             formData.append('assign_user', 'false');
-            formData.append('is_lost_report', 'true');
+            formData.append('is_lost_report', true);
             formData.append('status', 'lost');
             const res = await fetch(form.action, {
                 method: "POST",

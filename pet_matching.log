@@ -1,0 +1,70 @@
+Buscando coincidencias para Pet 32
+Índice FAISS construido: 2 descriptores, 2048D
+Encontradas 0 coincidencias para Pet 32
+Buscando coincidencias para Pet 31
+Encontradas 0 coincidencias para Pet 31
+Buscando coincidencias para Pet 30
+Encontradas 0 coincidencias para Pet 30
+Buscando coincidencias para Pet 29
+Encontradas 0 coincidencias para Pet 29
+Índice FAISS construido: 5 descriptores, 2048D
+Extrayendo descriptores para Pet 40, imagen 51
+Buscando coincidencias para Pet 40
+Índice FAISS construido: 6 descriptores, 2048D
+Encontradas 0 coincidencias para Pet 40
+Descriptores guardados: 1
+Extrayendo descriptores para Pet 41, imagen 52
+Buscando coincidencias para Pet 41
+Índice FAISS construido: 7 descriptores, 2048D
+Descriptores en índice ANTES: 7
+Descriptor 31 agregado al índice. Total: 8
+Descriptor 31 agregado al índice
+Descriptores en índice AHORA: 8
+Encontradas 0 coincidencias para Pet 41
+Descriptores guardados: 1
+Extrayendo descriptores para Pet 42, imagen 53
+Buscando coincidencias para Pet 42
+Descriptores en índice ANTES: 8
+Descriptor 32 agregado al índice. Total: 9
+Descriptor 32 agregado al índice
+Descriptores en índice AHORA: 9
+Encontradas 1 coincidencias para Pet 42
+  Match 1: Pet 41 con 100.0% similitud
+Error buscando coincidencias para Pet 42: Object of type datetime is not JSON serializable
+Descriptores guardados: 1
+Extrayendo descriptores para Pet 43, imagen 54
+Buscando coincidencias para Pet 43
+Índice FAISS construido: 9 descriptores, 2048D
+Descriptores en índice ANTES: 9
+Descriptor 33 agregado al índice. Total: 10
+Descriptor 33 agregado al índice
+Descriptores en índice AHORA: 10
+Encontradas 2 coincidencias para Pet 43
+  Match 1: Pet 41 con 100.0% similitud
+  Match 2: Pet 42 con 100.0% similitud
+Descriptores guardados: 1
+Extrayendo descriptores para Pet 44, imagen 55
+Buscando coincidencias para Pet 44
+Índice FAISS construido: 10 descriptores, 2048D
+Descriptores en índice ANTES: 10
+Descriptor 34 agregado al índice. Total: 11
+Descriptor 34 agregado al índice
+Descriptores en índice AHORA: 11
+Encontradas 3 coincidencias para Pet 44
+  Match 1: Pet 41 con 100.0% similitud
+  Match 2: Pet 42 con 100.0% similitud
+  Match 3: Pet 43 con 100.0% similitud
+Descriptores guardados: 1
+Extrayendo descriptores para Pet 45, imagen 56
+Buscando coincidencias para Pet 45
+Índice FAISS construido: 11 descriptores, 2048D
+Descriptores en índice ANTES: 11
+Descriptor 35 agregado al índice. Total: 12
+Descriptor 35 agregado al índice
+Descriptores en índice AHORA: 12
+Encontradas 4 coincidencias para Pet 45
+  Match 1: Pet 41 con 100.0% similitud
+  Match 2: Pet 42 con 100.0% similitud
+  Match 3: Pet 43 con 100.0% similitud
+Pet 45 tiene 4 coincidencias ALTAS (>85%)
+Descriptores guardados: 1

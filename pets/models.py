@@ -235,3 +235,105 @@ class PetFaceDescriptor(models.Model):
 
     def __str__(self):
         return f"{self.algorithm} - Pet {self.pet_id} - Image {self.pet_image_id}"
+
+
+class PetMatch(models.Model):
+    """
+    Registro de coincidencias entre mascotas perdidas/encontradas
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pendiente de Revisión'),
+        ('confirmed', 'Confirmado - Es la misma mascota'),
+        ('rejected', 'Rechazado - No es la misma'),
+        ('contacted', 'Usuario contactado'),
+    ]
+
+    # Mascota reportada como perdida
+    lost_pet = models.ForeignKey(
+        Pet,
+        on_delete=models.CASCADE,
+        related_name='potential_matches',
+        verbose_name='Mascota Perdida'
+    )
+
+    # Mascota potencialmente coincidente
+    found_pet = models.ForeignKey(
+        Pet,
+        on_delete=models.CASCADE,
+        related_name='matched_as_found',
+        verbose_name='Posible Coincidencia'
+    )
+
+    # Detalles del match
+    similarity_score = models.FloatField(
+        verbose_name='Porcentaje de Similitud',
+        help_text='0-100, donde 100 es idéntico'
+    )
+
+    algorithm = models.CharField(
+        max_length=50,
+        verbose_name='Algoritmo Usado'
+    )
+
+    match_details = models.JSONField(
+        default=dict,
+        verbose_name='Detalles del Match',
+        help_text='Información adicional sobre la coincidencia'
+    )
+
+    # Estado del match
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name='Estado'
+    )
+
+    # Metadata
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Fecha de Detección'
+    )
+
+    reviewed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Fecha de Revisión'
+    )
+
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reviewed_matches',
+        verbose_name='Revisado por'
+    )
+
+    notes = models.TextField(
+        blank=True,
+        verbose_name='Notas'
+    )
+
+    class Meta:
+        verbose_name = 'Coincidencia de Mascota'
+        verbose_name_plural = 'Coincidencias de Mascotas'
+        ordering = ['-similarity_score', '-created_at']
+        unique_together = ['lost_pet', 'found_pet']
+        indexes = [
+            models.Index(fields=['lost_pet', 'status']),
+            models.Index(fields=['similarity_score', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"Match: {self.lost_pet.name} <-> {self.found_pet.name} ({self.similarity_score}%)"
+
+    @property
+    def is_high_confidence(self):
+        """Match de alta confianza (>85%)"""
+        return self.similarity_score >= 85
+
+    @property
+    def is_medium_confidence(self):
+        """Match de confianza media (70-85%)"""
+        return 70 <= self.similarity_score < 85

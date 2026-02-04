@@ -3,16 +3,21 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
-from .models import Pet, PetImage, Species, Breed
+from .models import Pet, PetImage, Species, Breed, PetMatch
 from .forms import PetForm, PetSearchForm, PetImageForm
 from user.decorators import jwt_and_session_required
 from django.http import JsonResponse
-from rest_framework.decorators import api_view
 from .serializers import PetSerializer
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
 from django.core.exceptions import FieldDoesNotExist
+from .utils.pet_matcher import get_pet_matcher, rebuild_matcher_index
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def pet_list(request):
@@ -309,7 +314,7 @@ def lost_list(request):
     if query:
         pets = pets.filter(name__icontains=query)
     # Paginación: máximo 10 por página
-    paginator = Paginator(pets, 10)
+    paginator = Paginator(pets, 6)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -331,3 +336,280 @@ def lost_list(request):
         "breeds": breeds,
     }
     return render(request, 'pets/lost_list.html', context)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def manual_pet_match(request, pet_id):
+    """
+    Endpoint para cotejar manualmente una mascota perdida
+
+    POST /api/pets/{pet_id}/match/
+
+    Body (opcional):
+    {
+        "threshold": 75.0,      # Umbral mínimo de similitud (default: 70)
+        "top_k": 10,            # Número máximo de resultados (default: 10)
+        "use_filters": true,    # Usar filtros de especie/tamaño (default: true)
+        "rebuild_index": false  # Reconstruir índice antes de buscar (default: false)
+    }
+
+    Response:
+    {
+        "success": true,
+        "pet_id": 123,
+        "matches_found": 5,
+        "matches": [
+            {
+                "pet_id": 456,
+                "similarity": 87.5,
+                "match_details": {...}
+            }
+        ]
+    }
+    """
+    try:
+        pet = Pet.objects.get(pk=pet_id)
+    except Pet.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'Mascota no encontrada'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    # Verificar permisos
+    if pet.created_by != request.user and not request.user.is_staff:
+        return Response({
+            'success': False,
+            'message': 'No tienes permiso para cotejar esta mascota'
+        }, status=status.HTTP_403_FORBIDDEN)
+
+    # Verificar que sea reporte de pérdida
+    if not pet.is_lost_report:
+        return Response({
+            'success': False,
+            'message': 'Esta mascota no está reportada como perdida'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    # Parámetros
+    threshold = float(request.data.get('threshold', 70.0))
+    top_k = int(request.data.get('top_k', 10))
+    use_filters = request.data.get('use_filters', True)
+    rebuild_index = request.data.get('rebuild_index', False)
+
+    logger.info(f"Cotejamiento manual de Pet {pet_id} por usuario {request.user.id}")
+
+    try:
+        # Obtener o reconstruir matcher
+        if rebuild_index:
+            logger.info("Reconstruyendo índice FAISS...")
+            matcher = rebuild_matcher_index()
+        else:
+            matcher = get_pet_matcher()
+
+        # Buscar coincidencias
+        similar_pets = matcher.match_new_pet(
+            pet=pet,
+            threshold=threshold,
+            top_k=top_k,
+            use_filters=use_filters
+        )
+
+        # Guardar matches en BD (actualizar o crear)
+        saved_matches = []
+        for match in similar_pets:
+            pet_match, created = PetMatch.objects.update_or_create(
+                lost_pet=pet,
+                found_pet_id=match['pet_id'],
+                defaults={
+                    'similarity_score': match['similarity'],
+                    'algorithm': match['algorithm'],
+                    'status': 'pending',
+                    'match_details': match['match_details']
+                }
+            )
+            saved_matches.append({
+                'id': pet_match.id,
+                'pet_id': match['pet_id'],
+                'similarity': match['similarity'],
+                'algorithm': match['algorithm'],
+                'match_details': match['match_details'],
+                'created': created
+            })
+
+        logger.info(f"Cotejamiento completado: {len(similar_pets)} coincidencias")
+
+        return Response({
+            'success': True,
+            'pet_id': pet.id,
+            'matches_found': len(similar_pets),
+            'matches': saved_matches,
+            'search_params': {
+                'threshold': threshold,
+                'top_k': top_k,
+                'use_filters': use_filters,
+                'index_rebuilt': rebuild_index
+            }
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error en cotejamiento manual: {e}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': f'Error al buscar coincidencias: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_pet_matches(request, pet_id):
+    """
+    Obtener todas las coincidencias guardadas de una mascota
+
+    GET /api/pets/{pet_id}/matches/
+
+    Query params:
+    - status: pending|confirmed|rejected (opcional)
+    - min_similarity: float (opcional)
+    """
+    try:
+        pet = Pet.objects.get(pk=pet_id)
+    except Pet.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'Mascota no encontrada'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    # Verificar permisos
+    if pet.created_by != request.user and not request.user.is_staff:
+        return Response({
+            'success': False,
+            'message': 'No tienes permiso para ver las coincidencias'
+        }, status=status.HTTP_403_FORBIDDEN)
+
+    # Filtros
+    matches_qs = PetMatch.objects.filter(lost_pet=pet).select_related(
+        'found_pet',
+        'found_pet__species',
+        'found_pet__breed'
+    )
+
+    if status_filter := request.GET.get('status'):
+        matches_qs = matches_qs.filter(status=status_filter)
+
+    if min_similarity := request.GET.get('min_similarity'):
+        matches_qs = matches_qs.filter(similarity_score__gte=float(min_similarity))
+
+    # Serializar resultados
+    matches_data = []
+    for match in matches_qs:
+        matches_data.append({
+            'id': match.id,
+            'found_pet': {
+                'id': match.found_pet.id,
+                'name': match.found_pet.name or 'Sin nombre',
+                'species': match.found_pet.species.name,
+                'breed': match.found_pet.breed.name if match.found_pet.breed else 'Desconocida',
+                'color': match.found_pet.color,
+                'size': match.found_pet.get_size_display(),
+                'location': match.found_pet.reported_location,
+                'reported_at': match.found_pet.reported_at,
+                'primary_image': match.found_pet.primary_image.image.url if match.found_pet.primary_image else None,
+            },
+            'similarity_score': match.similarity_score,
+            'algorithm': match.algorithm,
+            'status': match.status,
+            'is_high_confidence': match.is_high_confidence,
+            'created_at': match.created_at,
+            'match_details': match.match_details
+        })
+
+    return Response({
+        'success': True,
+        'pet_id': pet.id,
+        'total_matches': len(matches_data),
+        'matches': matches_data
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_match_status(request, match_id):
+    """
+    Actualizar estado de una coincidencia
+
+    PATCH /api/matches/{match_id}/
+
+    Body:
+    {
+        "status": "confirmed"|"rejected"|"contacted",
+        "notes": "Opcional: notas sobre la decisión"
+    }
+    """
+    try:
+        match = PetMatch.objects.get(pk=match_id)
+    except PetMatch.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'Coincidencia no encontrada'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    # Verificar permisos
+    if match.lost_pet.created_by != request.user and not request.user.is_staff:
+        return Response({
+            'success': False,
+            'message': 'No tienes permiso para actualizar esta coincidencia'
+        }, status=status.HTTP_403_FORBIDDEN)
+
+    # Actualizar
+    new_status = request.data.get('status')
+    if new_status and new_status in dict(PetMatch.STATUS_CHOICES):
+        match.status = new_status
+
+    if notes := request.data.get('notes'):
+        match.notes = notes
+
+    from django.utils import timezone
+    match.reviewed_at = timezone.now()
+    match.reviewed_by = request.user
+    match.save()
+
+    return Response({
+        'success': True,
+        'match_id': match.id,
+        'new_status': match.status
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def rebuild_search_index(request):
+    """
+    Reconstruir el índice de búsqueda FAISS
+    (Solo administradores)
+
+    POST /api/admin/rebuild-index/
+    """
+    if not request.user.is_staff:
+        return Response({
+            'success': False,
+            'message': 'Solo administradores pueden reconstruir el índice'
+        }, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        logger.info(f"Reconstruyendo índice por usuario {request.user.id}")
+        matcher = rebuild_matcher_index()
+
+        total_descriptors = len(matcher.descriptor_ids) if matcher.descriptor_ids else 0
+
+        return Response({
+            'success': True,
+            'message': 'Índice reconstruido exitosamente',
+            'total_descriptors': total_descriptors
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        logger.error(f"Error reconstruyendo índice: {e}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': f'Error al reconstruir índice: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
