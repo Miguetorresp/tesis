@@ -461,6 +461,7 @@ def manual_pet_match(request, pet_id):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+# @jwt_and_session_required
 def get_pet_matches(request, pet_id):
     """
     Obtener todas las coincidencias guardadas de una mascota
@@ -480,11 +481,11 @@ def get_pet_matches(request, pet_id):
         }, status=status.HTTP_404_NOT_FOUND)
 
     # Verificar permisos
-    if pet.created_by != request.user and not request.user.is_staff:
-        return Response({
-            'success': False,
-            'message': 'No tienes permiso para ver las coincidencias'
-        }, status=status.HTTP_403_FORBIDDEN)
+    # if pet.created_by != request.user and not request.user.is_staff:
+    #     return Response({
+    #         'success': False,
+    #         'message': 'No tienes permiso para ver las coincidencias'
+    #     }, status=status.HTTP_403_FORBIDDEN)
 
     # Filtros
     matches_qs = PetMatch.objects.filter(lost_pet=pet).select_related(
@@ -502,6 +503,20 @@ def get_pet_matches(request, pet_id):
     # Serializar resultados
     matches_data = []
     for match in matches_qs:
+        # Preparar match_details con conversión de fechas
+        match_details = match.match_details.copy() if match.match_details else {}
+
+        # Convertir reported_at a string si no lo está ya
+        if 'reported_at' in match_details and match_details['reported_at']:
+            if isinstance(match_details['reported_at'], str):
+                # Ya está como string, formatear para display
+                from datetime import datetime
+                try:
+                    dt = datetime.fromisoformat(match_details['reported_at'].replace('Z', '+00:00'))
+                    match_details['reported_at'] = dt.strftime('%Y-%m-%d %H:%M:%S')
+                except:
+                    pass  # Si falla, dejar como está
+
         matches_data.append({
             'id': match.id,
             'found_pet': {
@@ -512,15 +527,15 @@ def get_pet_matches(request, pet_id):
                 'color': match.found_pet.color,
                 'size': match.found_pet.get_size_display(),
                 'location': match.found_pet.reported_location,
-                'reported_at': match.found_pet.reported_at,
+                'reported_at': match.found_pet.reported_at.isoformat() if match.found_pet.reported_at else None,
                 'primary_image': match.found_pet.primary_image.image.url if match.found_pet.primary_image else None,
             },
             'similarity_score': match.similarity_score,
             'algorithm': match.algorithm,
             'status': match.status,
             'is_high_confidence': match.is_high_confidence,
-            'created_at': match.created_at,
-            'match_details': match.match_details
+            'created_at': match.created_at.isoformat() if match.created_at else None,
+            'match_details': match_details
         })
 
     return Response({
@@ -613,3 +628,29 @@ def rebuild_search_index(request):
             'success': False,
             'message': f'Error al reconstruir índice: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@login_required
+def pet_matches_view(request, pet_id):
+    """
+    Vista para mostrar las coincidencias de una mascota perdida
+
+    GET /pets/{pet_id}/matches/
+    """
+    pet = get_object_or_404(Pet, pk=pet_id)
+
+    # Verificar permisos
+    if pet.created_by != request.user and not request.user.is_staff:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("No tienes permiso para ver estas coincidencias")
+
+    # Verificar que sea reporte de pérdida
+    if not pet.is_lost_report:
+        from django.contrib import messages
+        messages.warning(request, "Esta mascota no está reportada como perdida")
+
+    context = {
+        'pet': pet
+    }
+
+    return render(request, 'pets/pet_matches_list.html', context)
