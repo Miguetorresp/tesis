@@ -92,11 +92,14 @@
                             </div>
                             <div class="card-footer border-0 text-end px-3 justify-content-between ">
                                 <a href="{% url 'pets:pet_matches_view' pet.id %}"
-                                   class="btn btn-info me-2"
+                                   class="btn btn-primary me-2 position-relative"
                                    data-bs-toggle="tooltip"
                                    title="Ver coincidencias">
                                     <i class="bi bi-search-heart me-1"></i>
-                                    <span class="badge bg-light text-dark">{{ pet.potential_matches.count }}</span>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {{ pet.potential_matches.count }}
+                                        <span class="visually-hidden">unread messages</span>
+                                      </span>
                                 </a>
                                 <button class="btn btn-secondary me-2 view-pet-btn"
                                         data-id="{{ pet.id }}">
@@ -106,10 +109,12 @@
                                         data-id="{{ pet.id }}">
                                     <i class="bi bi-pencil me-1"></i>
                                 </button>
-                                <button class="btn btn-outline-danger delete-pet-btn" data-id="{{ pet.id }}"
-                                        title="Eliminar" style="flex-shrink:0; width:45px;">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                                {% if not pet.is_mine %}
+                                    <button class="btn btn-outline-danger delete-pet-btn" data-id="{{ pet.id }}"
+                                            title="Eliminar" style="flex-shrink:0; width:45px;">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -185,10 +190,11 @@
                             </div>
                             <h6 class="text-uppercase text-primary small">Información básica</h6>
                         </div>
-                        <div class="row m-0">
+                        <div class="row m-0 disable-fields">
                             <div class="col-md-6 mt-0">
                                 <label class="form-label">Nombre</label>
-                                <input name="name" type="text" class="form-control" placeholder="Ej: Luna">
+                                <input name="name" type="text" class="form-control"
+                                       placeholder="Ej: Luna">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Especie</label>
@@ -217,7 +223,7 @@
                             </div>
                             <h6 class="text-uppercase text-primary small">Edad y características físicas</h6>
                         </div>
-                        <div class="row m-0">
+                        <div class="row m-0 disable-fields">
                             <div class="col-md-3">
                                 <label class="form-label">Años</label>
                                 <input name="age_years" type="number" min="0" max="30" class="form-control"
@@ -230,7 +236,7 @@
                                        placeholder="0" required>
                             </div>
                         </div>
-                        <div class="row m-0">
+                        <div class="row m-0 disable-fields">
                             <div class="col-md-4 mt-3">
                                 <label class="form-label">Sexo</label>
                                 <select name="sex" class="form-select" required>
@@ -255,7 +261,7 @@
                                        required>
                             </div>
                         </div>
-                        <div class="row m-0">
+                        <div class="row m-0 disable-fields">
                             <div class="col-12 mt-3">
                                 <label class="form-label">Descripción</label>
                                 <textarea name="description" class="form-control" rows="3"
@@ -289,8 +295,8 @@
                             </div>
                             <h6 class="text-uppercase text-primary small">Estados</h6>
                         </div>
-                        <div class="row m-0">
-                            <div class="col-md-4">
+                        <div class="row m-0 ">
+                            <div class="col-md-4 disable-fields">
                                 <label class="form-label">Condición actual</label>
                                 <select name="health_status" class="form-select" required>
                                     {% for s in health_choices %}
@@ -300,7 +306,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Estado</label>
-                                <select name="status" class="form-select">
+                                <select name="status" class="form-select" disabled>
                                     {% for s in status_choices %}
                                         <option value="{{ s.0 }}">{{ s.1 }}</option>
                                     {% endfor %}
@@ -308,37 +314,42 @@
                             </div>
                         </div>
                         <!-- Imagenes -->
-                        <div class="section-divider">
-                            <div class="icon-wrapper">
-                                <i class="bi bi-hand-thumbs-up"></i>
-                            </div>
-                            <h6 class="text-uppercase text-primary small">Imagenes</h6>
-                        </div>
-                        <div class="d-flex ps-5 pe-5">
-                            <div class="alert alert-info d-flex align-items-center p-3" role="alert">
-                                <i class="bi bi-info-circle-fill flex-shrink-0 me-2"></i>
-                                <div>
-                                    Se recomienda subir al menos dos imágenes de la mascota: una
-                                    del
-                                    rostro y otra de cuerpo completo.
+                        <div class="hide-fields">
+
+
+                            <div class="section-divider">
+                                <div class="icon-wrapper">
+                                    <i class="bi bi-hand-thumbs-up"></i>
                                 </div>
+                                <h6 class="text-uppercase text-primary small">Imagenes</h6>
                             </div>
-
-                        </div>
-                        <div id="loaded-images"></div>
-                        <!-- Zonas de carga -->
-                        <div class="row m-0">
-                            <div class="col-md-12 mb-12">
-                                <div class="drop-zone" id="dropZone">
-                                    <input type="file" id="imageInput" name="images" accept="image/*" multiple hidden>
-
-                                    <div id="dropText">
-                                        <div class="upload-icon">📷</div>
-                                        <p class="fw-bold">Arrastra imágenes aquí</p>
-                                        <p class="text-muted small">o haz clic para seleccionar</p>
+                            <div class="d-flex ps-5 pe-5">
+                                <div class="alert alert-info d-flex align-items-center p-3" role="alert">
+                                    <i class="bi bi-info-circle-fill flex-shrink-0 me-2"></i>
+                                    <div>
+                                        Se recomienda subir al menos dos imágenes de la mascota: una
+                                        del
+                                        rostro y otra de cuerpo completo.
                                     </div>
+                                </div>
 
-                                    <div id="previewContainer" class="d-flex flex-wrap gap-3 mt-3"></div>
+                            </div>
+                            <div id="loaded-images"></div>
+                            <!-- Zonas de carga -->
+                            <div class="row m-0">
+                                <div class="col-md-12 mb-12">
+                                    <div class="drop-zone" id="dropZone">
+                                        <input type="file" id="imageInput" name="images" accept="image/*" multiple
+                                               hidden>
+
+                                        <div id="dropText">
+                                            <div class="upload-icon">📷</div>
+                                            <p class="fw-bold">Arrastra imágenes aquí</p>
+                                            <p class="text-muted small">o haz clic para seleccionar</p>
+                                        </div>
+
+                                        <div id="previewContainer" class="d-flex flex-wrap gap-3 mt-3"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -606,7 +617,8 @@
 
                     if (data.success) {
                         const pet = data.pet;
-                        console.log('pet', pet);
+                        const is_mine = data.is_mine;
+
                         // Mostrar modal
                         const modal = new bootstrap.Modal(document.getElementById('petModal'));
                         modal.show();
@@ -642,6 +654,19 @@
                         setValue('textarea[name="ubication_details"]', pet.ubication_details);
                         setValue('select[name="health_status"]', pet.health_status);
                         setValue('select[name="status"]', pet.status);
+
+                        //Permitir edicion
+                        const fields = document.querySelectorAll(
+                            ".disable-fields input, .disable-fields textarea, .disable-fields select"
+                        );
+                        fields.forEach(field => {
+                            field.disabled = is_mine;
+                        });
+
+                        const fields_hide = document.querySelectorAll(".hide-fields");
+                        fields_hide.forEach(field => {
+                            field.hidden = is_mine;
+                        });
 
                         //Agregar imagenes cargadas
                         if (pet.images.length > 0) {

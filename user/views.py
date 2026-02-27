@@ -9,12 +9,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from user.decorators import jwt_and_session_required
 from .serializers import RegisterSerializer, LoginSerializer
+from rest_framework.permissions import AllowAny
 
 
 # ------------------------------
 #       REGISTRO API
 # ------------------------------
 class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -27,13 +30,15 @@ class RegisterView(APIView):
 #       LOGIN API (JWT + SESIÓN + COOKIES)
 # ------------------------------
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
 
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
 
-        user = serializer.validated_data["user"]        # OBJETO REAL User
+        user = serializer.validated_data["user"]  # OBJETO REAL User
         user_data = serializer.validated_data["user_data"]  # DICCIONARIO SERIALIZADO
 
         # 1. Crear sesión Django
@@ -68,9 +73,9 @@ class LoginView(APIView):
             key="access_token",
             value=access_token,
             httponly=True,
-            secure=True,        # True si usas HTTPS (recomendado)
+            secure=True,  # True si usas HTTPS (recomendado)
             samesite="Strict",
-            max_age=60 * 30     # 30 minutos
+            max_age=60 * 30  # 30 minutos
         )
 
         response.set_cookie(
@@ -81,8 +86,6 @@ class LoginView(APIView):
             samesite="Strict",
             max_age=60 * 60 * 24 * 7  # 7 días
         )
-
-        
 
         return response
 
@@ -116,13 +119,14 @@ def login_page(request):
 # ------------------------------
 @jwt_and_session_required
 def dashboard(request):
-    user_data = request.session.get("user_data")   # <--- YA FUNCIONA
+    user_data = request.session.get("user_data")  # <--- YA FUNCIONA
 
     print("Datos enviados al template:", user_data)
 
     return render(request, "user/dashboard.html", {
         "user": user_data
     })
+
 
 # Logout
 def logout_view(request):

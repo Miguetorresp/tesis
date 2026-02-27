@@ -20,8 +20,8 @@ def generate_face_descriptors(sender, instance, created, **kwargs):
     except Exception:
         return
 
-    if not pet.is_lost_report:
-        return
+    # if not pet.is_lost_report:
+    #     return
 
     # ruta absoluta del archivo
     if not instance.image:

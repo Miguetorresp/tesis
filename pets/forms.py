@@ -37,7 +37,7 @@ class PetForm(forms.ModelForm):
             'sex', 'size', 'color', 'weight', 'description',
             'health_status', 'vaccinated', 'sterilized',
             'dewormed', 'microchipped', 'good_with_kids', 'good_with_dogs',
-            'good_with_cats', 'ubication_details',
+            'good_with_cats', 'ubication_details', 'status', 'is_lost_report'
         ]
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),

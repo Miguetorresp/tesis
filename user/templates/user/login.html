@@ -306,7 +306,7 @@
                 <p class="text-muted mb-4">Ingresa tus datos para continuar</p>
 
                 <form id="registerForm" class="needs-validation" novalidate>
-                    {% csrf_token %}
+                    {#                    {% csrf_token %}#}
                     <div class="row">
                         <div class="col-md-6 col-sm-12 ">
                             <div class="mb-3">
@@ -490,7 +490,7 @@
         // Enviar datos al servidor
         const response = await fetch("/user/auth/register/", {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
+            headers: {"Content-Type": "application/json", 'X-CSRFToken': '{{ csrf_token }}',},
             body: JSON.stringify({
                 email,
                 password,

@@ -68,3 +68,572 @@ Encontradas 4 coincidencias para Pet 45
   Match 3: Pet 43 con 100.0% similitud
 Pet 45 tiene 4 coincidencias ALTAS (>85%)
 Descriptores guardados: 1
+Error reconstruyendo índice: 
+Error reconstruyendo índice: 
+Error reconstruyendo índice: 
+Error reconstruyendo índice: 
+Índice FAISS construido: 11 descriptores, 2048D
+Cotejamiento completado: 4 coincidencias
+Error reconstruyendo índice: 
+Cotejamiento completado: 4 coincidencias
+Error reconstruyendo índice: 
+Índice FAISS construido: 11 descriptores, 2048D
+Cotejamiento completado: 2 coincidencias
+Error reconstruyendo índice: 
+Índice FAISS construido: 11 descriptores, 2048D
+Cotejamiento completado: 2 coincidencias
+Extrayendo descriptores para Pet 48, imagen 60
+Buscando coincidencias para Pet 48
+Índice FAISS construido: 12 descriptores, 2048D
+Descriptores en índice ANTES: 12
+Descriptor 36 agregado al índice. Total: 13
+Descriptor 36 agregado al índice
+Descriptores en índice AHORA: 13
+Encontradas 0 coincidencias para Pet 48
+Descriptores guardados: 1
+Error reconstruyendo índice: 
+Cotejamiento completado: 0 coincidencias
+Extrayendo descriptores para Pet 49, imagen 61
+Descriptores guardados: 1
+Extrayendo descriptores para Pet 49, imagen 62
+Descriptores guardados: 1
+Extrayendo descriptores para Pet 49, imagen 63
+Descriptores guardados: 1
+Error reconstruyendo índice: 
+Índice FAISS construido: 12 descriptores, 2048D
+Cotejamiento completado: 0 coincidencias
+Extrayendo descriptores para Pet 50, imagen 64
+Buscando coincidencias para Pet 50
+Descriptores en índice ANTES: 12
+Descriptor 40 agregado al índice. Total: 13
+Descriptor 40 agregado al índice
+Descriptores en índice AHORA: 13
+Encontradas 1 coincidencias para Pet 50
+  Match 1: Pet 48 con 100.0% similitud
+Pet 50 tiene 1 coincidencias ALTAS (>85%)
+Descriptores guardados: 1
+Error reconstruyendo índice: 
+Cotejamiento completado: 1 coincidencias
+Error reconstruyendo índice: 
+Índice FAISS construido: 13 descriptores, 2048D
+Cotejamiento completado: 1 coincidencias
+matchsss Match: Scar <-> scarss (100.0%)
+matchsss Match: scarss <-> Scar (100.0%)
+
+        Match ID: 14
+        Lost Pet: scarss - Gato
+        Lost Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: Scar - Gato
+        Found Pet Owner: prueba torres <prueba@gmail.com>
+        Found Pet Species: Gato
+        
+
+        Match ID: 14
+        Lost Pet: scarss - Gato
+        Lost Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: Scar - Gato
+        Found Pet Owner: prueba torres <prueba@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: None
+        
+
+        Match ID: 14
+        Lost Pet: scarss - Gato
+        Lost Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: Scar - Gato
+        Found Pet Owner: prueba torres <prueba@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: None
+        
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: 7
+        
+
+        Match ID: 14
+        Lost Pet: scarss - Gato
+        Lost Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: Scar - Gato
+        Found Pet Owner: prueba torres <prueba@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: None
+        is_mine: False
+        
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        is_mine: True
+        
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        is_mine: True
+        
+Error enviando notificación de contacto: 'User' object has no attribute 'last_name'
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 754, in send_contact_notification
+    requester_info = f"{requester.first_name} {requester.last_name}" if requester.first_name else requester.username
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\utils\functional.py", line 253, in inner
+    return func(_wrapped, *args)
+AttributeError: 'User' object has no attribute 'last_name'
+
+        Match ID: 14
+        Lost Pet: scarss - Gato
+        Lost Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: Scar - Gato
+        Found Pet Owner: prueba torres <prueba@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: None
+        is_mine: False
+        
+Error enviando notificación de contacto: 'User' object has no attribute 'last_name'
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 754, in send_contact_notification
+    requester_info = f"{requester.first_name} {requester.last_name}" if requester.first_name else requester.username
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\utils\functional.py", line 253, in inner
+    return func(_wrapped, *args)
+AttributeError: 'User' object has no attribute 'last_name'
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        is_mine: True
+        
+Error enviando notificación de contacto: 'User' object has no attribute 'last_name'
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 756, in send_contact_notification
+    requester_info = f"{requester.first_name} {requester.last_name}" if requester.first_name else requester.username
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\utils\functional.py", line 253, in inner
+    return func(_wrapped, *args)
+AttributeError: 'User' object has no attribute 'last_name'
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        is_mine: True
+        
+Error enviando notificación de contacto: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 833, in send_contact_notification
+    send_mail(
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\__init__.py", line 92, in send_mail
+    return mail.send()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\message.py", line 307, in send
+    return self.get_connection(fail_silently).send_messages([self])
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 128, in send_messages
+    new_conn_created = self.open()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.login(self.username, self.password)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 739, in login
+    (code, resp) = self.auth(
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 641, in auth
+    response = encode_base64(initial_response.encode('ascii'), eol='')
+UnicodeEncodeError: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        is_mine: True
+        
+Error enviando notificación de contacto: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 833, in send_contact_notification
+    send_mail(
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\__init__.py", line 92, in send_mail
+    return mail.send()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\message.py", line 307, in send
+    return self.get_connection(fail_silently).send_messages([self])
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 128, in send_messages
+    new_conn_created = self.open()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.login(self.username, self.password)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 739, in login
+    (code, resp) = self.auth(
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 641, in auth
+    response = encode_base64(initial_response.encode('ascii'), eol='')
+UnicodeEncodeError: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        is_mine: True
+        
+Error enviando notificación de contacto: 'Pet' object has no attribute 'cellphone'
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 753, in send_contact_notification
+    phone = getattr(match.found_pet.cellphone, 'phone', 'No proporcionado')
+AttributeError: 'Pet' object has no attribute 'cellphone'
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        is_mine: True
+        
+Error enviando notificación de contacto: 'NoneType' object has no attribute 'cellphone'
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 753, in send_contact_notification
+    phone = getattr(match.found_pet.user.cellphone, 'phone', 'No proporcionado')
+AttributeError: 'NoneType' object has no attribute 'cellphone'
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        is_mine: True
+        
+Error enviando notificación de contacto: 'NoneType' object has no attribute 'cellphone'
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 754, in send_contact_notification
+    phone = getattr(match.found_pet.user.cellphone, 'phone', 'No proporcionado')
+AttributeError: 'NoneType' object has no attribute 'cellphone'
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        other user: None
+        is_mine: True
+        
+Error enviando notificación de contacto: 'Pet' object has no attribute 'email'
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 756, in send_contact_notification
+    e_mail = getattr(match.found_pet.email or "No proporcionado")
+AttributeError: 'Pet' object has no attribute 'email'
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        other user: None
+        is_mine: True
+        
+
+                    phone: No proporcionado
+                    e_mail: No proporcionado
+                    
+                    
+Error enviando notificación de contacto: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 843, in send_contact_notification
+    send_mail(
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\__init__.py", line 92, in send_mail
+    return mail.send()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\message.py", line 307, in send
+    return self.get_connection(fail_silently).send_messages([self])
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 128, in send_messages
+    new_conn_created = self.open()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.login(self.username, self.password)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 739, in login
+    (code, resp) = self.auth(
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 641, in auth
+    response = encode_base64(initial_response.encode('ascii'), eol='')
+UnicodeEncodeError: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        other user: None
+        is_mine: True
+        
+Error enviando notificación de contacto: 'NoneType' object has no attribute 'cellphone'
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 758, in send_contact_notification
+    phone = match.found_pet.user.cellphone
+AttributeError: 'NoneType' object has no attribute 'cellphone'
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        other user: None
+        is_mine: True
+        
+
+                    phone: None
+                    e_mail: None
+                    
+                    
+Error enviando notificación de contacto: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 846, in send_contact_notification
+    send_mail(
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\__init__.py", line 92, in send_mail
+    return mail.send()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\message.py", line 307, in send
+    return self.get_connection(fail_silently).send_messages([self])
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 128, in send_messages
+    new_conn_created = self.open()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.login(self.username, self.password)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 739, in login
+    (code, resp) = self.auth(
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 641, in auth
+    response = encode_base64(initial_response.encode('ascii'), eol='')
+UnicodeEncodeError: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        other user: None
+        is_mine: True
+        
+
+                    phone: miguetorres30@gmail.com
+                    e_mail: None
+                    
+                    
+Error enviando notificación de contacto: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 846, in send_contact_notification
+    send_mail(
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\__init__.py", line 92, in send_mail
+    return mail.send()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\message.py", line 307, in send
+    return self.get_connection(fail_silently).send_messages([self])
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 128, in send_messages
+    new_conn_created = self.open()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.login(self.username, self.password)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 739, in login
+    (code, resp) = self.auth(
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 641, in auth
+    response = encode_base64(initial_response.encode('ascii'), eol='')
+UnicodeEncodeError: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        other user: None
+        is_mine: True
+        
+Error enviando notificación de contacto: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 836, in send_contact_notification
+    send_mail(
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\__init__.py", line 92, in send_mail
+    return mail.send()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\message.py", line 307, in send
+    return self.get_connection(fail_silently).send_messages([self])
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 128, in send_messages
+    new_conn_created = self.open()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.login(self.username, self.password)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 739, in login
+    (code, resp) = self.auth(
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 641, in auth
+    response = encode_base64(initial_response.encode('ascii'), eol='')
+UnicodeEncodeError: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+
+        Match ID: 14
+        Lost Pet: scarss - Gato
+        Lost Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: Scar - Gato
+        Found Pet Owner: prueba torres <prueba@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: None
+        other user: prueba torres <prueba@gmail.com>
+        is_mine: False
+        
+Error enviando notificación de contacto: 'Pet' object has no attribute 'email'
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 797, in send_contact_notification
+    requester_email = match.lost_pet.email or "No proporcionado"
+AttributeError: 'Pet' object has no attribute 'email'
+
+        Match ID: 14
+        Lost Pet: scarss - Gato
+        Lost Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: Scar - Gato
+        Found Pet Owner: prueba torres <prueba@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: None
+        other user: prueba torres <prueba@gmail.com>
+        is_mine: False
+        
+Error enviando notificación de contacto: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 838, in send_contact_notification
+    send_mail(
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\__init__.py", line 92, in send_mail
+    return mail.send()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\message.py", line 307, in send
+    return self.get_connection(fail_silently).send_messages([self])
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 128, in send_messages
+    new_conn_created = self.open()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.login(self.username, self.password)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 739, in login
+    (code, resp) = self.auth(
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 641, in auth
+    response = encode_base64(initial_response.encode('ascii'), eol='')
+UnicodeEncodeError: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+
+        Match ID: 14
+        Lost Pet: scarss - Gato
+        Lost Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: Scar - Gato
+        Found Pet Owner: prueba torres <prueba@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: None
+        other user: prueba torres <prueba@gmail.com>
+        is_mine: False
+        
+Error enviando notificación de contacto: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 838, in send_contact_notification
+    send_mail(
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\__init__.py", line 92, in send_mail
+    return mail.send()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\message.py", line 307, in send
+    return self.get_connection(fail_silently).send_messages([self])
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 128, in send_messages
+    new_conn_created = self.open()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.login(self.username, self.password)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 739, in login
+    (code, resp) = self.auth(
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 641, in auth
+    response = encode_base64(initial_response.encode('ascii'), eol='')
+UnicodeEncodeError: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+
+        Match ID: 14
+        Lost Pet: scarss - Gato
+        Lost Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: Scar - Gato
+        Found Pet Owner: prueba torres <prueba@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: None
+        other user: prueba torres <prueba@gmail.com>
+        is_mine: False
+        
+Error enviando notificación de contacto: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 838, in send_contact_notification
+    send_mail(
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\__init__.py", line 92, in send_mail
+    return mail.send()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\message.py", line 307, in send
+    return self.get_connection(fail_silently).send_messages([self])
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 128, in send_messages
+    new_conn_created = self.open()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.login(self.username, self.password)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 739, in login
+    (code, resp) = self.auth(
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 641, in auth
+    response = encode_base64(initial_response.encode('ascii'), eol='')
+UnicodeEncodeError: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+
+        Match ID: 15
+        Lost Pet: Scar - Gato
+        Lost Pet Owner: prueba torres <prueba@gmail.com>
+        Lost Pet Species: Gato
+        Found Pet: scarss - Gato
+        Found Pet Owner: Miguel Torres <miguetorres30@gmail.com>
+        Found Pet Species: Gato
+        User Id del solicitante: prueba torres <prueba@gmail.com>
+        other user: None
+        is_mine: True
+        
+Error enviando notificación de contacto: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+Traceback (most recent call last):
+  File "C:\Tesis\pets\views.py", line 839, in send_contact_notification
+    send_mail(
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\__init__.py", line 92, in send_mail
+    return mail.send()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\message.py", line 307, in send
+    return self.get_connection(fail_silently).send_messages([self])
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 128, in send_messages
+    new_conn_created = self.open()
+  File "C:\Tesis\venv_tesis\lib\site-packages\django\core\mail\backends\smtp.py", line 95, in open
+    self.connection.login(self.username, self.password)
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 739, in login
+    (code, resp) = self.auth(
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.10_3.10.3056.0_x64__qbz5n2kfra8p0\lib\smtplib.py", line 641, in auth
+    response = encode_base64(initial_response.encode('ascii'), eol='')
+UnicodeEncodeError: 'ascii' codec can't encode character '\xf1' in position 31: ordinal not in range(128)
+Error en cotejamiento manual: 

@@ -7,33 +7,33 @@
 
 <body>
 
-    <!-- 🔵 MENÚ GLOBAL -->
-    <nav>
-        <ul>
-            
-            <li><a href="/user/dashboard/">Dashboard</a></li>
-            <li><a href="/user/profile/">Perfil</a></li>
+<!-- 🔵 MENÚ GLOBAL -->
+<nav>
+    <ul>
 
-            {% if request.user.role_id == 1 %}
-                <!-- Admin -->
-                <li><a href="/admin/users/">Usuarios</a></li>
-                <li><a href="/admin/settings/">Configuración</a></li>
-            {% endif %}
+        <li><a href="/user/dashboard/">logger.error(f"Error reconstruyendo índice: {e}", exc_info=True)</a></li>
+        <li><a href="/user/profile/">Perfil</a></li>
 
-            {% comment %} {% if request.user.role_id in [1, 2] %} {% endcomment %}
-                <!-- Admin y Supervisor -->
-                <li><a href="/reports/">Reportes</a></li>
-            {% comment %} {% endif %} {% endcomment %}
-        </ul>
-    </nav>
+        {% if request.user.role_id == 1 %}
+            <!-- Admin -->
+            <li><a href="/admin/users/">Usuarios</a></li>
+            <li><a href="/admin/settings/">Configuración</a></li>
+        {% endif %}
 
-    <hr>
+        {% comment %} {% if request.user.role_id in [1, 2] %} {% endcomment %}
+        <!-- Admin y Supervisor -->
+        <li><a href="/reports/">Reportes</a></li>
+        {% comment %} {% endif %} {% endcomment %}
+    </ul>
+</nav>
 
-    <!-- 🔵 CONTENIDO DINÁMICO -->
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
+<hr>
+
+<!-- 🔵 CONTENIDO DINÁMICO -->
+<main>
+    {% block content %}
+    {% endblock %}
+</main>
 
 </body>
 </html>

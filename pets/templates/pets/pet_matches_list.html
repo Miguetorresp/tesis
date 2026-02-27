@@ -29,7 +29,7 @@
     <!-- Filtros -->
     <div class="row g-2 mb-3">
         <div class="col-md-4">
-            <select id="statusFilter" class="form-select" onchange="filterMatches()">
+            <select id="statusFilter" class="form-select bg-white" onchange="filterMatches()">
                 <option value="">Todos los estados</option>
                 <option value="pending">Pendiente</option>
                 <option value="confirmed">Confirmado</option>
@@ -38,7 +38,7 @@
             </select>
         </div>
         <div class="col-md-4">
-            <select id="similarityFilter" class="form-select" onchange="filterMatches()">
+            <select id="similarityFilter" class="form-select bg-white" onchange="filterMatches()">
                 <option value="0">Todas las similitudes</option>
                 <option value="85">Alta confianza (≥85%)</option>
                 <option value="70">Confianza media (≥70%)</option>
@@ -89,7 +89,7 @@
                     </div>
                     <div class="alert alert-info mt-3">
                         <i class="bi bi-info-circle"></i>
-                        Al confirmar contacto, se enviará una notificación al dueño de la mascota.
+                        Se enviará una notificación automática al usuario para que pueda responder.
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -280,22 +280,24 @@
                                 <!-- Acciones -->
                                 <div class="col-md-2">
                                     <div class="action-buttons d-grid gap-2">
-                                        <button class="btn btn-sm btn-secondary" onclick="updateMatchStatus(${match.id}, 'confirmed')"
-                                                ${match.status === 'confirmed' ? 'disabled' : ''}>
-                                            <i class="bi bi-check-circle"></i> Confirmar
-                                        </button>
-                                        <button class="btn btn-sm btn-primary" onclick="openContactModal(${match.id}, '${match.found_pet.name}')" 
-                                                ${match.status === 'contacted' ? 'disabled' : ''}>
-                                            <i class="bi bi-envelope"></i> Contactar
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="updateMatchStatus(${match.id}, 'rejected')"
-                                                ${match.status === 'rejected' ? 'disabled' : ''}>
-                                            <i class="bi bi-x-circle"></i> Rechazar
-                                        </button>
-                                        <a href="/pets/${match.found_pet.id}/" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                            <i class="bi bi-eye"></i> Ver detalles
-                                        </a>
-                                    </div>
+    ${match.found_pet.is_mine
+                ? `<button class="btn btn-sm btn-success" onclick="updateMatchStatus(${match.id}, 'confirmed')"
+                ${match.status === 'confirmed' ? 'disabled' : ''}>
+                <i class="bi bi-check-circle"></i> Confirmar
+           </button>
+           <button class="btn btn-sm btn-outline-danger" onclick="updateMatchStatus(${match.id}, 'rejected')"
+                ${match.status === 'rejected' ? 'disabled' : ''}>
+                <i class="bi bi-x-circle"></i> Rechazar
+           </button>`
+                : '' // si no es tu mascota, no se muestran estos botones
+            }
+
+    <!-- Este botón siempre se muestra -->
+    <button class="btn btn-sm btn-primary" onclick="openContactModal(${match.id}, '${match.found_pet.name}', '${match.found_pet.is_mine}')"
+            ${match.status === 'contacted' ? 'disabled' : ''}>
+        <i class="bi bi-envelope"></i> Contactar
+    </button>
+</div>
                                 </div>
                             </div>
                         </div>
@@ -375,7 +377,7 @@
 
         async function confirmStatusChange() {
             try {
-                const response = await fetch(`/api/matches/${currentStatusMatch}/`, {
+                const response = await fetch(`/pets/matches/${currentStatusMatch}/`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -399,14 +401,18 @@
             }
         }
 
-        function openContactModal(matchId, petName) {
+        function openContactModal(matchId, petName, is_mine) {
             currentContactMatch = matchId;
-
-            document.getElementById('contactInfo').innerHTML = `
-                <p>Estás a punto de solicitar contacto con el dueño de <strong>${petName}</strong>.</p>
-                <p>Se enviará una notificación automática al usuario para que pueda responder.</p>
+            if (is_mine === 'true') {
+                const pet_name = "{{ pet.name|default:'Mascota sin nombre'|escapejs }}";
+                document.getElementById('contactInfo').innerHTML = `
+                <p>Estás a punto de solicitar contacto con la persona que probablemente encontró a <strong>${pet_name}</strong>.</p>
             `;
-
+            } else {
+                document.getElementById('contactInfo').innerHTML = `
+                <p>Estás a punto de solicitar contacto con el dueño de <strong>${petName}</strong>.</p>
+            `;
+            }
             const modal = new bootstrap.Modal(document.getElementById('contactModal'));
             modal.show();
         }
@@ -414,7 +420,7 @@
         async function confirmContact() {
             try {
                 // Primero actualizar el estado a "contacted"
-                const statusResponse = await fetch(`/api/matches/${currentContactMatch}/`, {
+                const statusResponse = await fetch(`/pets/matches/${currentContactMatch}/`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -428,23 +434,23 @@
                 }
 
                 // Luego enviar notificación
-                const notificationResponse = await fetch(`/api/matches/${currentContactMatch}/contact/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    }
-                });
-
-                const data = await notificationResponse.json();
-
-                if (data.success) {
-                    showToast('Notificación enviada al dueño', 'success');
-                    bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
-                    loadMatches(); // Recargar la lista
-                } else {
-                    showToast(data.message || 'Error al enviar notificación', 'error');
-                }
+                //const notificationResponse = await fetch(`/pets/matches/${currentContactMatch}/contact/`, {
+                //    method: 'POST',
+                //    headers: {
+                //        'Content-Type': 'application/json',
+                //        'X-CSRFToken': getCookie('csrftoken')
+                //    }
+                //});
+//
+                //const data = await notificationResponse.json();
+//
+                //if (data.success) {
+                //    showToast('Notificación enviada al dueño', 'success');
+                //    bootstrap.Modal.getInstance(document.getElementById('contactModal')).hide();
+                //    loadMatches(); // Recargar la lista
+                //} else {
+                //    showToast(data.message || 'Error al enviar notificación', 'error');
+                //}
             } catch (error) {
                 console.error('Error al contactar:', error);
                 showToast('Error al enviar la solicitud de contacto', 'error');
@@ -462,7 +468,7 @@
             matchesList.classList.add('d-none');
 
             try {
-                const response = await fetch(`/api/pets/${petId}/match/`, {
+                const response = await fetch(`/pets/${petId}/match/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

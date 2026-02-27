@@ -75,11 +75,16 @@ def pet_list(request):
 def pet_detail(request, pk):
     try:
         pet = Pet.objects.get(pk=pk)
+        is_mine = (
+                request.user.is_authenticated and
+                pet.user == request.user
+        )
         serializer = PetSerializer(pet, context={'request': request})
         return Response({
             "success": True,
             "message": "Mascota encontrada",
-            "pet": serializer.data
+            "pet": serializer.data,
+            "is_mine": is_mine
         }, status=status.HTTP_200_OK)
     except Pet.DoesNotExist:
         return Response({
@@ -144,7 +149,13 @@ def pet_update(request, pk):
     if request.method == 'POST':
         form = PetForm(request.POST, request.FILES, instance=pet)
         if form.is_valid():
-            pet = form.save()
+            pet = form.save(commit=False)
+            # is_lost_report = request.POST.get('is_lost_report', 'false').lower() == 'true'
+            # logger.info(f"Error reconstruyendo índice: ", form)
+            status_pet = form.cleaned_data.get('status')
+            if status_pet == 'lost':
+                pet.is_lost_report = True
+            pet.save()
 
             # Manejar nuevas imágenes
             images = request.FILES.getlist('images')
@@ -235,7 +246,7 @@ def my_pets(request):
     sex_choices = Pet.SEX_CHOICES
     size_choices = Pet.SIZE_CHOICES
     health_choices = Pet.HEALTH_STATUS_CHOICES
-    status_choices = Pet.STATUS_CHOICES
+    status_choices = Pet.STATUS_CHOICES_MY_PETS
     breeds = Breed.objects.all()
     context = {
         'pets': page_obj,
@@ -308,6 +319,15 @@ def lost_list(request):
     # Obtener el query de búsqueda
     query = request.GET.get('q', '')
     pets = Pet.objects.filter(created_by=request.user, is_lost_report=True).select_related('species', 'breed')
+
+    for pet in pets:
+        print('pet', pet)
+        is_mine = (
+                request.user.is_authenticated and
+                pet.user == request.user
+        )
+        pet.is_mine = is_mine
+
     # serializer = PetSerializer(pets, context={'request': request})
     # print(serializer.data)
     # Filtrar por nombre si hay query
@@ -383,6 +403,7 @@ def manual_pet_match(request, pet_id):
             'message': 'No tienes permiso para cotejar esta mascota'
         }, status=status.HTTP_403_FORBIDDEN)
 
+    logger.info(f"Error reconstruyendo índice: ")
     # Verificar que sea reporte de pérdida
     if not pet.is_lost_report:
         return Response({
@@ -396,7 +417,7 @@ def manual_pet_match(request, pet_id):
     use_filters = request.data.get('use_filters', True)
     rebuild_index = request.data.get('rebuild_index', False)
 
-    logger.info(f"Cotejamiento manual de Pet {pet_id} por usuario {request.user.id}")
+    # logger.info(f"Cotejamiento manual de Pet {pet_id} por usuario {request.user.id}")
 
     try:
         # Obtener o reconstruir matcher
@@ -517,6 +538,12 @@ def get_pet_matches(request, pet_id):
                 except:
                     pass  # Si falla, dejar como está
 
+        # verificar si es mia esa mascota
+        is_mine = (
+                request.user.is_authenticated and
+                pet.user == request.user
+        )
+
         matches_data.append({
             'id': match.id,
             'found_pet': {
@@ -526,9 +553,11 @@ def get_pet_matches(request, pet_id):
                 'breed': match.found_pet.breed.name if match.found_pet.breed else 'Desconocida',
                 'color': match.found_pet.color,
                 'size': match.found_pet.get_size_display(),
-                'location': match.found_pet.reported_location,
+                'location': match.found_pet.ubication_details,
                 'reported_at': match.found_pet.reported_at.isoformat() if match.found_pet.reported_at else None,
                 'primary_image': match.found_pet.primary_image.image.url if match.found_pet.primary_image else None,
+                'sex': match.found_pet.sex,
+                'is_mine': is_mine,
             },
             'similarity_score': match.similarity_score,
             'algorithm': match.algorithm,
@@ -580,8 +609,15 @@ def update_match_status(request, match_id):
     if new_status and new_status in dict(PetMatch.STATUS_CHOICES):
         match.status = new_status
 
-    if notes := request.data.get('notes'):
-        match.notes = notes
+    # Actualizar mascota Pet cunado el estado es confirmed
+    if new_status == 'confirmed':
+        lost_pet = match.lost_pet
+        lost_pet.status = 'found'  # o el valor correcto según tus STATUS_CHOICES
+        lost_pet.is_lost_report = False  # opcional, si ya no debe figurar como perdida
+        lost_pet.save()
+
+    # if notes := request.data.get('notes'):
+    #     match.notes = notes
 
     from django.utils import timezone
     match.reviewed_at = timezone.now()
@@ -654,3 +690,183 @@ def pet_matches_view(request, pet_id):
     }
 
     return render(request, 'pets/pet_matches_list.html', context)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def send_contact_notification(request, match_id):
+    """
+    Enviar notificación al dueño cuando alguien quiere contactarlo
+
+    POST /pets/matches/{match_id}/contact/
+    """
+    try:
+        match = PetMatch.objects.select_related(
+            'lost_pet__created_by',
+            'found_pet__created_by',
+            'lost_pet__species',
+            'found_pet__species',
+            'lost_pet__user',
+            'found_pet__user'
+        ).get(pk=match_id)
+        is_mine = (
+                request.user.is_authenticated and
+                match.lost_pet.user == request.user
+        )
+        logger.info(f"""
+        Match ID: {match.id}
+        Lost Pet: {match.lost_pet}
+        Lost Pet Owner: {match.lost_pet.created_by}
+        Lost Pet Species: {match.lost_pet.species}
+        Found Pet: {match.found_pet}
+        Found Pet Owner: {match.found_pet.created_by}
+        Found Pet Species: {match.found_pet.species}
+        User Id del solicitante: {match.lost_pet.user}
+        other user: {match.found_pet.user}
+        is_mine: {is_mine}
+        """)
+    except PetMatch.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'Coincidencia no encontrada'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+    # Verificar permisos (solo el dueño de lost_pet puede contactar)
+    # if match.lost_pet.created_by != request.user and not request.user.is_staff:
+    #     return Response({
+    #         'success': False,
+    #         'message': 'No tienes permiso para contactar'
+    #     }, status=status.HTTP_403_FORBIDDEN)
+
+    # El usuario a notificar es el dueño de found_pet
+    # owner_to_notify = match.found_pet.created_by
+    # requester = request.user
+    #
+    # if not owner_to_notify:
+    #     return Response({
+    #         'success': False,
+    #         'message': 'No se puede contactar: el dueño no está registrado'
+    #     }, status=status.HTTP_400_BAD_REQUEST)
+
+    # Verificar si la mascota es mia o no
+
+    # Enviar notificación por email
+    try:
+        from django.core.mail import send_mail
+        from django.conf import settings
+        # Información del solicitante
+        requester = request.user
+
+        if is_mine:
+            subject = f"Notificación: Posible dueño de la mascota reportada"
+            e_mail = match.found_pet.created_by.email or "No proporcionado"
+            # owner_to_notify = match.lost_pet.created_by
+            requester_info = f"{requester.first_name} {requester.first_last_name}" if requester.first_last_name else requester.username
+            requester_email = requester.email or "No proporcionado"
+            requester_phone = getattr(requester, 'phone', 'No proporcionado')
+            owner_to_notify = match.found_pet.created_by
+            message = f"""
+                Hola,
+                
+                La mascota que reportaste como perdida tiene una posible coincidencia con una mascota reportada como perdida. Aquí te dejo los detalles:
+                
+                INFORMACIÓN DE LA COINCIDENCIA:
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                • Mascota reportada como perdida: {match.lost_pet.name}
+                • Especie: {match.lost_pet.species.name}
+                • Color: {match.lost_pet.color}
+                • Ubicación reportada: {match.lost_pet.reported_location or 'No especificada'}
+                • Similitud: {match.similarity_score:.1f}%
+                
+                DATOS DE CONTACTO:
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                • Nombre: {requester_info}
+                • Email: {requester_email}
+                • Teléfono: {requester_phone}
+                
+                Por favor, contacta directamente con esta persona para verificar si se trata de su mascota.
+                
+                IMPORTANTE: Verifica siempre la identidad antes de compartir información personal.
+                
+                Puedes ver más detalles en tu panel:
+                {settings.SITE_URL}/pets/{match.found_pet.id}/matches/
+                
+                ¡Tu ayuda puede traer de vuelta a su mascota con su dueño!
+                
+                Saludos,
+                El equipo de PetFinder
+                        """
+        else:
+            subject = f"Notificación: Alguien cree que esta mascota es suya"
+            e_mail = match.found_pet.created_by.email or "No proporcionado"
+            # owner_to_notify = match.lost_pet.created_by
+            requester_info = f"{requester.first_name} {requester.first_last_name}" if requester.first_last_name else requester.username
+            requester_email = requester.email or "No proporcionado"
+            requester_phone = getattr(requester, 'cellphone', 'No proporcionado')
+            message = f"""
+                Hola,
+                
+                ¡Tenemos excelentes noticias! Alguien cree haber encontrado a tu mascota "{match.found_pet.name}". Aquí te dejo los detalles:
+                
+                INFORMACIÓN DE LA COINCIDENCIA:
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                • Mascota reportada como encontrada: {match.found_pet.name}
+                • Especie: {match.found_pet.species.name}
+                • Color: {match.found_pet.color}
+                • Ubicación reportada: {match.found_pet.reported_location or 'No especificada'}
+                • Similitud: {match.similarity_score:.1f}%
+                
+                DATOS DE CONTACTO:
+                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                • Nombre: {requester_info}
+                • Email: {requester_email}
+                • Teléfono: {requester_phone}
+                
+                Por favor, contacta directamente con esta persona para verificar si se trata de esta mascota.
+                
+                IMPORTANTE: Verifica siempre la identidad antes de compartir información personal.
+                
+                Puedes ver más detalles en tu panel:
+                {settings.SITE_URL}/pets/{match.lost_pet.id}/matches/
+                
+                ¡Esperamos que encuentres a tu mascota pronto!
+                
+                Saludos,
+                El equipo de PetFinder
+                        """
+        logger.info(f"""
+                mensaje: {message}
+                subject: {subject}
+                e_mail: {e_mail}
+                """)
+
+        # Enviar email
+        if e_mail != "No proporcionado":
+            send_mail(
+                subject=subject,
+                message=message,
+                # from_email=settings.DEFAULT_FROM_EMAIL,
+                from_email='jordy.torres@uisek.edu.ec',
+                recipient_list=[e_mail],
+                fail_silently=False
+            )
+            return Response({
+                'success': True,
+                'message': 'Notificación enviada correctamente',
+                'contact_info': {
+                    'name': requester_info,
+                    'email': requester_email
+                }
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'success': False,
+                'message': 'El dueño no tiene email registrado'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        logger.error(f"Error enviando notificación de contacto: {e}", exc_info=True)
+        return Response({
+            'success': False,
+            'message': f'Error al enviar notificación: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

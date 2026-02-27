@@ -40,7 +40,8 @@
                 <span class="nav-text">Mis mascotas</span>
             </a>
 
-            <a href="{% url 'pets:list' %}" class="nav-link">
+            {#            <a href="{% url 'pets:list' %}" class="nav-link">#}
+            <a href="" class="nav-link">
                 <i class="bi bi-megaphone"></i>
                 <span class="nav-text">Adopción</span>
             </a>
@@ -50,19 +51,19 @@
                 <span class="nav-text">Perdidos</span>
             </a>
 
-            <a href="#salesSubmenu" class="nav-link" data-bs-toggle="collapse">
-                <i class="bi bi-graph-up"></i>
-                <span class="nav-text">Sales</span>
-                <i class="bi bi-chevron-down ms-auto toggle-icon"></i>
-            </a>
-            <div class="collapse submenu" id="salesSubmenu">
-                <a href="#" class="nav-link submenu-link">
-                    <span class="nav-text">Overview</span>
-                </a>
-                <a href="#" class="nav-link submenu-link">
-                    <span class="nav-text">Reports</span>
-                </a>
-            </div>
+            {#            <a href="#salesSubmenu" class="nav-link" data-bs-toggle="collapse">#}
+            {#                <i class="bi bi-graph-up"></i>#}
+            {#                <span class="nav-text">Sales</span>#}
+            {#                <i class="bi bi-chevron-down ms-auto toggle-icon"></i>#}
+            {#            </a>#}
+            {#            <div class="collapse submenu" id="salesSubmenu">#}
+            {#                <a href="#" class="nav-link submenu-link">#}
+            {#                    <span class="nav-text">Overview</span>#}
+            {#                </a>#}
+            {#                <a href="#" class="nav-link submenu-link">#}
+            {#                    <span class="nav-text">Reports</span>#}
+            {#                </a>#}
+            {#            </div>#}
         </div>
 
         {% if user.role_id == 1 %}

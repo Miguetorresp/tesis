@@ -59,6 +59,13 @@ class Pet(models.Model):
         ('adopted', 'Adoptado'),
         ('unavailable', 'No Disponible'),
         ('lost', 'Perdido'),
+        ('contacted', 'Contactado'),
+        ('found', 'Encontrado'),
+    ]
+
+    STATUS_CHOICES_MY_PETS = [
+        ('available', 'Disponible'),
+        ('lost', 'Perdido'),
         ('found', 'Encontrado'),
     ]
 
